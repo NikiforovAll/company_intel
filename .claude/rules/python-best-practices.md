@@ -1,3 +1,8 @@
+---
+paths:
+  - "none"
+---
+
 # Python Best Practices
 
 ## Dev Setup

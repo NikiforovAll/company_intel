@@ -1,6 +1,7 @@
 "use client";
 
-import { CopilotKitProvider, CopilotChat } from "@copilotkit/react-core/v2";
+import { CopilotKitProvider } from "@copilotkit/react-core/v2";
+import { ChatPanel } from "../components/chat-panel";
 
 const examples = [
   "Gather data about Figma",
@@ -14,10 +15,9 @@ export default function BackofficePage() {
     <CopilotKitProvider runtimeUrl="/api/copilotkit">
       <main className="h-[calc(100vh-3.5rem)] w-screen flex flex-col bg-gray-50">
         <div className="flex-1 min-h-0 px-8 pt-4">
-          <CopilotChat
-            className="h-full rounded-2xl"
-            labels={{ welcomeMessageText: "What data operation would you like to run?" }}
+          <ChatPanel
             agentId="backoffice_ops"
+            welcomeMessage="What data operation would you like to run?"
           />
         </div>
         <footer className="border-t border-gray-200 bg-white px-8 py-3">

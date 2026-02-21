@@ -1,3 +1,8 @@
+---
+paths:
+  - "none"
+---
+
 This repository is set up to use Aspire. Aspire is an orchestrator for the entire application and will take care of configuring dependencies, building, and running the application. The resources that make up the application are defined in `apphost.cs` including application code and external dependencies.
 
 ## General recommendations for working with Aspire
