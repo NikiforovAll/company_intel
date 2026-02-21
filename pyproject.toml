@@ -1,0 +1,17 @@
+[project]
+name = "company-intel-workspace"
+version = "0.0.1"
+requires-python = ">=3.12"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "md-dead-link-check",
+    "pre-commit",
+]
+
+[tool.md_dead_link_check]
+timeout = 5
+check_web_links = true
+catch_response_codes = [404, 410, 500]
+exclude_files = ["docs/_draft/*"]

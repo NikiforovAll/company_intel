@@ -1,0 +1,30 @@
+repos:
+  - repo: local
+    hooks:
+      # Markdown
+      - id: md-dead-link-check
+        name: markdown link check
+        entry: uv run md-dead-link-check
+        language: system
+        types: [markdown]
+        pass_filenames: false
+
+      # Python
+      - id: ruff-check
+        name: ruff lint
+        entry: uv run --directory src/agent ruff check --fix
+        language: system
+        types: [python]
+        pass_filenames: false
+      - id: ruff-format
+        name: ruff format
+        entry: uv run --directory src/agent ruff format
+        language: system
+        types: [python]
+        pass_filenames: false
+      - id: mypy
+        name: mypy
+        entry: uv run --directory src/agent mypy agent
+        language: system
+        types: [python]
+        pass_filenames: false
