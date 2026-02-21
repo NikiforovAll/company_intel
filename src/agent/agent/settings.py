@@ -3,12 +3,14 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 from functools import lru_cache
+from pathlib import Path
 
 
 @dataclass(slots=True)
 class Settings:
     model: str
     ollama_base_url: str
+    data_dir: Path
 
 
 @lru_cache(maxsize=1)
@@ -29,7 +31,12 @@ def get_settings() -> Settings:
 
     os.environ.setdefault("OLLAMA_BASE_URL", base_url)
 
+    # agent/settings.py -> agent/ -> src/agent/ -> src/ -> repo root
+    _repo_root = Path(__file__).resolve().parents[3]
+    data_dir = Path(os.environ.get("DATA_DIR", str(_repo_root / "artifacts" / "data")))
+
     return Settings(
         model=f"ollama:{model_name}",
         ollama_base_url=base_url,
+        data_dir=data_dir,
     )

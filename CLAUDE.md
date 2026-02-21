@@ -29,14 +29,19 @@ src/ui/        → Next.js 15 frontend (CopilotKit + AG-UI streaming)
 
 **Data flow**: UI → CopilotKit → AG-UI HttpAgent → FastAPI → Pydantic AI Agent → Ollama (Qwen3)
 
+### Observability
+
+This project is instrumented with OpenTelemetry (via Logfire).
+
 ## Commands
 
 ### Run the full stack
 ```bash
 aspire run                          # starts all resources (Ollama, Qdrant, agent, UI)
-```
 
 ### Quality gates (all at once)
+
+Always prefer this check instead of running commands one by one.
 ```bash
 .claude/skills/quality-gates/scripts/check.sh          # lint + format + mypy
 .claude/skills/quality-gates/scripts/check.sh --all     # + Aspire integration tests
@@ -53,6 +58,15 @@ pnpm dev                            # Next.js dev server on :3000
 ```bash
 dotnet test tests/AppHost.Tests -p:WarningLevel=0 /clp:ErrorsOnly
 ```
+
+### Crawler
+
+To setup crawler (one-time):
+
+```bash
+cd src/agent && uv run crawl4ai-setup  # one-time setup for Crawl4AI 
+```
+
 
 ## Key Tech Choices
 

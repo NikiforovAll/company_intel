@@ -75,3 +75,4 @@ def configure_telemetry() -> None:
         handlers=[LoggingHandler(), logging.StreamHandler()],
         level=logging.INFO,
     )
+    logging.getLogger("agent").setLevel(logging.DEBUG)
