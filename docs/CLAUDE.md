@@ -22,6 +22,7 @@ Each doc compares alternatives and documents the decision.
 | [tradeoffs/02-text-processing.md](tradeoffs/02-text-processing.md) | Semantic chunking on Markdown (256-512 tokens)             |
 | [tradeoffs/03-embeddings.md](tradeoffs/03-embeddings.md)           | snowflake-arctic-embed-s (384-dim) over MiniLM             |
 | [tradeoffs/04-vector-store.md](tradeoffs/04-vector-store.md)       | Qdrant over ChromaDB (pre-search filtering, hybrid search) |
+| [tradeoffs/05-embedding-runtime.md](tradeoffs/05-embedding-runtime.md) | Ollama dense + fastembed BM25, tiktoken for counting   |
 | [tradeoffs/05-retrieval.md](tradeoffs/05-retrieval.md)             | Hybrid RRF (BM25 + dense) over vector-only                 |
 | [tradeoffs/06-llm-inference.md](tradeoffs/06-llm-inference.md)     | Qwen3 8B (32K context) over Llama3 (8K)                    |
 | [tradeoffs/07-ui.md](tradeoffs/07-ui.md)                         | CopilotKit + Next.js over AG-UI Dojo (minimal standalone UI)   |
@@ -31,6 +32,7 @@ Each doc compares alternatives and documents the decision.
 | Doc                                                              | What it covers                                              |
 | ---------------------------------------------------------------- | ----------------------------------------------------------- |
 | [implementation/scraper.md](implementation/scraper.md)           | Scraper pipeline: Crawl4AI, URL resolution, text cleaning   |
+| [implementation/chunking-embedding.md](implementation/chunking-embedding.md) | Chunking, embedding & Qdrant ingestion pipeline |
 
 ## Misc
 

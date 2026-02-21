@@ -4,14 +4,18 @@ import asyncio
 import logging
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
+from pathlib import Path
 
 import logfire
 from pydantic_ai import Agent, RunContext
 
+from agent.chunker import chunk_documents
+from agent.embedder import get_embedder
 from agent.scraper import scrape_company
 from agent.scraper.models import ScrapeResult
-from agent.scraper.storage import list_companies, wipe_raw_data
+from agent.scraper.storage import list_companies, load_raw_documents, wipe_raw_data
 from agent.settings import get_settings
+from agent.vectorstore import get_vectorstore
 
 logger = logging.getLogger(__name__)
 
@@ -54,15 +58,40 @@ FORMAT:
 """
 
 
-async def _run_scrape(company: str, data_dir: object) -> None:
-    from pathlib import Path
+async def _ingest_to_vectorstore(company: str, data_dir: Path) -> int:
+    with logfire.span("ingest_to_vectorstore {company}", company=company):
+        store = get_vectorstore()
+        store.delete_company(company)
 
+        docs = load_raw_documents(company, data_dir)
+        if not docs:
+            logger.warning("No raw documents to ingest for '%s'", company)
+            return 0
+
+        chunks = chunk_documents(docs)
+        if not chunks:
+            logger.warning("No chunks produced for '%s'", company)
+            return 0
+
+        embedder = get_embedder()
+        texts = [c.text for c in chunks]
+        dense, sparse = await embedder.embed_texts(texts)
+
+        total = store.upsert_chunks(chunks, dense, sparse)
+        logger.info(
+            "Ingested %d chunks for '%s' (%d docs)",
+            total,
+            company,
+            len(docs),
+        )
+        return total
+
+
+async def _run_scrape(company: str, data_dir: object) -> None:
     job = _scrape_jobs[company]
     with logfire.span("background_scrape {company}", company=company) as span:
         try:
             result = await scrape_company(company, Path(str(data_dir)))
-            job.status = "done"
-            job.finished_at = datetime.now(UTC)
             job.result = result
             job.errors = result.errors
 
@@ -79,6 +108,11 @@ async def _run_scrape(company: str, data_dir: object) -> None:
                 result.wikipedia_scraped,
                 len(result.errors),
             )
+
+            await _ingest_to_vectorstore(company, Path(str(data_dir)))
+
+            job.status = "done"
+            job.finished_at = datetime.now(UTC)
         except Exception as exc:
             job.status = "failed"
             job.finished_at = datetime.now(UTC)
@@ -203,11 +237,23 @@ def create_backoffice_agent() -> Agent[None, str]:
         """
         normalized = company_name.strip().lower()
         logger.info("delete_company_data called", extra={"company": normalized})
+
+        store = get_vectorstore()
+        deleted_points = store.delete_company(normalized)
+
         raw_dir = settings.data_dir / normalized / "raw"
         if raw_dir.exists():
             wipe_raw_data(normalized, settings.data_dir)
             _scrape_jobs.pop(normalized, None)
-            return f"Deleted all data for '{company_name}'."
+            return (
+                f"Deleted all data for '{company_name}' "
+                f"({deleted_points} vectors removed)."
+            )
+        if deleted_points > 0:
+            return (
+                f"Deleted {deleted_points} vectors for '{company_name}' "
+                "(no raw files found)."
+            )
         return f"No data found for '{company_name}'."
 
     return agent

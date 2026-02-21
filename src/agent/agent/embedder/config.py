@@ -1,0 +1,3 @@
+SPARSE_MODEL = "Qdrant/bm25"
+BATCH_SIZE = 64
+DENSE_DIM = 384

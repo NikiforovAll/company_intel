@@ -4,15 +4,15 @@ from __future__ import annotations
 
 # -- Website deep crawl (homepage BFS) --
 WEBSITE_MAX_DEPTH = 2
-WEBSITE_MAX_PAGES = 20
+WEBSITE_MAX_PAGES = 10
 
 # -- Company pages shallow crawl (newsroom, about, blog) --
 COMPANY_PAGES_MAX_DEPTH = 1
-COMPANY_PAGES_MAX_PAGES = 10
+COMPANY_PAGES_MAX_PAGES = 5
 COMPANY_PAGES_MAX_SEEDS = 3
 
 # -- Search results scrape --
-SEARCH_MAX_URLS = 20
+SEARCH_MAX_URLS = 10
 SEARCH_PER_URL_TIMEOUT = 45  # seconds
 SEARCH_BATCH_TIMEOUT = 300  # seconds
 

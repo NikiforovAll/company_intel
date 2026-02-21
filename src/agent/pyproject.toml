@@ -10,6 +10,9 @@ dependencies = [
     "crawl4ai",
     "langdetect",
     "duckduckgo-search",
+    "qdrant-client>=1.12",
+    "fastembed>=0.4",
+    "tiktoken>=0.8",
 ]
 
 [dependency-groups]
@@ -36,7 +39,7 @@ warn_return_any = true
 warn_unused_configs = true
 
 [[tool.mypy.overrides]]
-module = ["crawl4ai.*", "langdetect.*"]
+module = ["crawl4ai.*", "langdetect.*", "fastembed.*", "qdrant_client.*", "tiktoken.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]

@@ -61,11 +61,11 @@ The LLM routes between them based on user message. Both capabilities live in a s
 | `gather` agent tool                    | FR-1, FR-2           | Agent recognizes gather intent, invokes tool with company name |
 | Crawl4AI scraper — website + Wikipedia | FR-2                 | Raw Markdown files saved to `data/{company}/raw/`          |
 | Text cleaning                          | Constraints §2       | Boilerplate removed, min/max length enforced, English only |
-| Semantic chunking                      | FR-3, Constraints §3 | Chunks 256-512 tokens, metadata attached                   |
-| Embedding generation                   | Constraints §4       | Dense vectors (384-dim, arctic-embed-s) per chunk          |
-| Sparse vector generation               | Constraints §5       | BM25 tokenized vectors per chunk                           |
-| Qdrant ingestion                       | FR-4                 | Chunks searchable with metadata filtering                  |
-| Idempotent re-gather                   | FR-2, NFR-5          | Re-running same company replaces previous data             |
+| ~~Semantic chunking~~                  | FR-3, Constraints §3 | ~~Chunks 256-512 tokens, metadata attached~~  ✅            |
+| ~~Embedding generation~~               | Constraints §4       | ~~Dense vectors (384-dim, arctic-embed-s) per chunk~~  ✅   |
+| ~~Sparse vector generation~~           | Constraints §5       | ~~BM25 tokenized vectors per chunk~~  ✅                    |
+| ~~Qdrant ingestion~~                   | FR-4                 | ~~Chunks searchable with metadata filtering~~  ✅           |
+| ~~Idempotent re-gather~~               | FR-2, NFR-5          | ~~Re-running same company replaces previous data~~  ✅      |
 | Progress feedback via chat             | —                    | Agent streams status ("scraping website...", "chunking 42 documents...") |
 
 **Requires**: FR-1 (input), FR-2 (gathering), FR-3 (processing), FR-4 (knowledge base), NFR-5 (reproducibility)

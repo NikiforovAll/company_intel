@@ -23,7 +23,10 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
+    from agent.embedder import get_embedder
+
     logger.info("Agent service started")
+    get_embedder()
     yield
     logger.info("Agent service shutting down")
 

@@ -388,23 +388,24 @@ def _collect_news(
 
 
 async def probe_company_subdomains(homepage_url: str) -> list[str]:
-    """HEAD-check common company subdomains to discover pages DDG misses."""
+    """Probe common company subdomains to discover pages DDG misses."""
     root = _extract_root_domain(homepage_url)
     candidates = [f"https://{sub}.{root}" for sub in PROBE_SUBDOMAINS]
 
     found: list[str] = []
-    async with httpx.AsyncClient(
-        timeout=PROBE_TIMEOUT, follow_redirects=True, verify=False
-    ) as client:
-        for url in candidates:
-            try:
-                resp = await client.head(url)
-                if resp.status_code < 400:
-                    resolved = str(resp.url)
-                    if _extract_root_domain(resolved) == root:
-                        found.append(resolved)
-            except Exception:
-                pass
+    with logfire.suppress_instrumentation():
+        async with httpx.AsyncClient(
+            timeout=PROBE_TIMEOUT, follow_redirects=True, verify=False
+        ) as client:
+            for url in candidates:
+                try:
+                    async with client.stream("GET", url) as resp:
+                        if resp.status_code < 400:
+                            resolved = str(resp.url)
+                            if _extract_root_domain(resolved) == root:
+                                found.append(resolved)
+                except Exception:
+                    pass
     if found:
         logger.info("Subdomain probe for %s found: %s", root, found)
     return found
