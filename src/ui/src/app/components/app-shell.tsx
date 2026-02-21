@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { CopilotKitProvider } from "@copilotkit/react-core/v2";
 import { ChatPanel } from "./chat-panel";
+import { HelpModal } from "./help-modal";
 
 type Tab = "chat" | "backoffice";
 
@@ -12,21 +13,25 @@ const tabs: { id: Tab; label: string; activeColor: string }[] = [
 ];
 
 const chatExamples = [
-  "Who are Figma's competitors?",
+  "Who is PayPal's CEO?",
+  "Honney allegations and involvement wiht PayPal",
   "What is Spotify's business model?",
+  "What are the latest new about Figma?",
   "When was Airbnb founded?",
-  "How does Stripe make money?",
+  "How does Google make money?",
+  "What are the most successful companies recently?",
 ];
 
 const backofficeExamples = [
   "Gather data about Figma",
-  "Re-gather info for Spotify",
+  "Get info for Spotify",
   "Delete all data for Airbnb",
   "List gathered companies",
 ];
 
 export function AppShell() {
   const [activeTab, setActiveTab] = useState<Tab>("chat");
+  const [helpOpen, setHelpOpen] = useState(false);
 
   return (
     <>
@@ -45,7 +50,17 @@ export function AppShell() {
             {tab.label}
           </button>
         ))}
+        <button
+          onClick={() => setHelpOpen(true)}
+          className="ml-auto w-7 h-7 rounded-full border border-gray-300 text-gray-400 hover:text-gray-600 hover:border-gray-400 text-sm font-medium cursor-pointer transition-colors"
+        >
+          ?
+        </button>
       </nav>
+
+      {helpOpen && (
+        <HelpModal activeTab={activeTab} onClose={() => setHelpOpen(false)} />
+      )}
 
       <CopilotKitProvider runtimeUrl="/api/copilotkit">
         <div className={`h-[calc(100vh-3.5rem)] w-screen flex flex-col bg-gray-50 ${activeTab !== "chat" ? "hidden" : ""}`}>

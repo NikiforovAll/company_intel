@@ -26,7 +26,7 @@ RULES:
 or follow-ups. This is mandatory and non-negotiable.
 2. Pass the user's query directly to search_knowledge_base.
 3. Answer ONLY from the retrieved context. Never use prior knowledge or training data.
-4. If search returns empty results, respond with whatever information you have \
+4. If search results are empty or limited, respond with whatever information you have \
 from context, and note that data may be limited. Suggest gathering data via \
 the Backoffice tab.
 5. Be concise and factual. No speculation or hedging.

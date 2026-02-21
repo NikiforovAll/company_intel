@@ -4,3 +4,8 @@
 [data-copilotkit] {
   --cpk-container-3xl: 64rem;
 }
+
+/* Prevent chat messages from overflowing into footer */
+[data-copilotkit] .copilotKitChat {
+  overflow: hidden;
+}
