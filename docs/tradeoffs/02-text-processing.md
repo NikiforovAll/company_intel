@@ -58,7 +58,7 @@ Raw HTML → Crawl4AI → Markdown → Post-processing → Chunks
 1. **Unicode normalization** (NFC) — consistent tokenization
 2. **Whitespace normalization** — collapse multiple newlines, trim
 3. **Remove artifacts** — leftover HTML entities, empty links, image alt-text without context
-4. **Min-length filter** — discard documents < 100 chars
+4. **Min-length filter** — discard documents < 50 chars
 5. **Max-length truncation** — cap at 50K chars
 
 ### Why Markdown as Intermediate Format

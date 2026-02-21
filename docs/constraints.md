@@ -21,7 +21,7 @@ Explicit bounds for each stage of the pipeline. These are not aspirational — t
 | ------------------- | ----------------------------------------- | ------------------------------------- |
 | Remove boilerplate  | nav, footer, sidebar, cookie banners, ads | Noise reduces retrieval quality       |
 | Strip HTML tags     | All (keep structure as Markdown)          | Embeddings work on plain text         |
-| Min document length | 100 characters after cleaning             | Skip near-empty pages                 |
+| Min document length | 50 characters after cleaning              | Skip near-empty pages                 |
 | Max document length | 50,000 characters                         | Truncate to avoid processing outliers |
 | Encoding            | UTF-8, normalize unicode (NFC)            | Consistent tokenization               |
 | Language filter     | English only — discard non-English pages  | Embedding model is English-optimized  |

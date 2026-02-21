@@ -26,6 +26,12 @@ Each doc compares alternatives and documents the decision.
 | [tradeoffs/06-llm-inference.md](tradeoffs/06-llm-inference.md)     | Qwen3 8B (32K context) over Llama3 (8K)                    |
 | [tradeoffs/07-ui.md](tradeoffs/07-ui.md)                         | CopilotKit + Next.js over AG-UI Dojo (minimal standalone UI)   |
 
+## Implementation
+
+| Doc                                                              | What it covers                                              |
+| ---------------------------------------------------------------- | ----------------------------------------------------------- |
+| [implementation/scraper.md](implementation/scraper.md)           | Scraper pipeline: Crawl4AI, URL resolution, text cleaning   |
+
 ## Misc
 
 | Doc                                                                                  | What it covers                                 |

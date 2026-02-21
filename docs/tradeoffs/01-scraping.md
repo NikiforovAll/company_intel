@@ -56,3 +56,45 @@
 - Crawl4AI quality on complex sites (heavy JS, iframes) — mitigate: fallback to raw HTML + manual cleaning
 - Playwright memory on resource-constrained machines — mitigate: reuse browser instance across pages
 - Rate limiting / IP blocking — mitigate: respect robots.txt, 1 req/s, randomize user-agent
+
+## Implementation Findings
+
+### Crawl4AI Built-in Features Leveraged
+
+| Feature | Crawl4AI API | Custom code needed? |
+|---------|-------------|-------------------|
+| Boilerplate removal | `excluded_tags` (nav, footer, header, aside, form) | Config only |
+| robots.txt compliance | `check_robots_txt=True` | No |
+| URL dedup in BFS | Internal visited set | No |
+| Max pages cap | `BFSDeepCrawlStrategy(max_pages=N)` | No |
+| Rate limiting | `mean_delay=1.0` + `max_range=0.5` | No |
+| Content type filter | `ContentTypeFilter(allowed_types=["text/html"])` | Config only |
+| HTML→Markdown | `DefaultMarkdownGenerator(ignore_links=True)` | Config only |
+
+### What We Built On Top
+
+- **Language detection** — `langdetect` library post-crawl
+- **Post-crawl text cleaning** — regex filters for wiki artifacts, cookie blocks, bare URLs, markdown images
+- **Retry for single `arun()`** — manual retry loop for Wikipedia (built-in retry only works with `arun_many()`)
+- **Wikipedia article resolution** — MediaWiki search API to find correct article title
+- **Official website extraction** — parse Wikipedia infobox HTML for company URL
+- **Multi-query DDG search** — 3 web queries + 1 news query, domain classification
+- **Subdomain probing** — HEAD-check common subdomains (newsroom, about, investors, etc.)
+- **Cross-step URL dedup** — `seen_urls` set shared across all pipeline steps
+- **Windows compat layer** — `ProactorEventLoop` in thread for Playwright subprocess support
+
+### BFS vs Best-First Deep Crawl
+
+BFS chosen for predictability — crawls breadth-first up to `max_depth=2`, `max_pages=20`. Best-First with `KeywordRelevanceScorer` is a future improvement for prioritizing high-value pages.
+
+### Browser Reuse
+
+Single `AsyncWebCrawler` context manager keeps one Chromium instance alive across all pages within a scrape run. No cold start per URL — only one ~2-3s startup per source.
+
+### URL Resolution Strategy
+
+2-step fallback for finding a company's homepage:
+1. Official website from Wikipedia infobox
+2. DuckDuckGo first non-social search result
+
+No `{company}.com` convention — too unreliable (e.g. `meta.com` doesn't work). When both steps miss, website crawl is skipped; pipeline still collects Wikipedia + search results.

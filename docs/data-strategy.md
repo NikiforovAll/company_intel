@@ -40,7 +40,7 @@ Per [constraints.md](./constraints.md):
 | Constraint          | Value                                     |
 | ------------------- | ----------------------------------------- |
 | Remove              | nav, footer, sidebar, cookie banners, ads |
-| Min document length | 100 characters after cleaning             |
+| Min document length | 50 characters after cleaning              |
 | Max document length | 50,000 characters (truncate)              |
 | Encoding            | UTF-8, NFC normalization                  |
 | Language filter      | English only — discard non-English pages  |
@@ -54,7 +54,7 @@ class RawDocument(BaseModel):
     url: str
     title: str
     content: str  # clean Markdown (UTF-8, NFC)
-    source_type: Literal["website", "wikipedia", "news", "crunchbase"]
+    source_type: Literal["website", "wikipedia", "search"]
     company: str  # normalized name
     scraped_at: datetime
 ```
@@ -82,10 +82,9 @@ class ChunkMetadata(BaseModel):
 graph LR
     subgraph raw[Raw Storage / filesystem]
         dir[data/company/raw/]
-        dir --> w[website.md]
+        dir --> w["website_001.md ... website_NNN.md"]
         dir --> wiki[wikipedia.md]
-        dir --> n[news_001.md]
-        dir --> c[crunchbase.md]
+        dir --> s["search_001.md ... search_NNN.md"]
     end
 
     subgraph vector[Vector Storage / Qdrant]
