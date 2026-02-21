@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  python-quality-gates:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/agent
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+
+      - run: uv python install
+
+      - run: uv sync
+
+      - name: Ruff Lint
+        run: uv run ruff check agent main.py
+
+      - name: Ruff Format Check
+        run: uv run ruff format --check agent main.py
+
+      - name: Mypy Type Check
+        run: uv run mypy agent main.py
