@@ -13,7 +13,7 @@ export function NavBar() {
 
   return (
     <nav className="h-14 flex items-center gap-6 px-6 border-b border-gray-200 bg-white">
-      <span className="font-semibold text-gray-800 mr-4">Company Intel</span>
+      <span className="font-semibold text-gray-800 mr-4">Company Intelligence</span>
       {tabs.map((tab) => {
         const active = tab.href === "/" ? pathname === "/" : pathname.startsWith(tab.href);
         return (

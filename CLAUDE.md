@@ -2,7 +2,7 @@
 
 ## What This Is
 
-Company Intel — a RAG-based company research assistant. Two-phase system: (1) online data gathering via backoffice agent, (2) offline Q&A via chat agent.
+Company Intelligence — a RAG-based company research assistant. Two-phase system: (1) online data gathering via backoffice agent, (2) offline Q&A via chat agent.
 
 ## Architecture
 

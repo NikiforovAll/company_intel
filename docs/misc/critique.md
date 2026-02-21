@@ -45,7 +45,7 @@ We chose "semantic chunking" over fixed-size windows. Sounds good. But:
 
 **Status: Resolved.** Switched to Qdrant with hybrid search (BM25 + dense vectors via RRF fusion). Entity queries now handled by BM25 branch, semantic queries by dense branch. Pre-search filtering for optional company scoping. See `docs/tradeoffs/04-vector-store.md` and `docs/tradeoffs/05-retrieval.md`.
 
-Company intelligence queries are often **entity-heavy**:
+Company Intelligence queries are often **entity-heavy**:
 - "When did Spotify go public?"
 - "Who is the CEO of Airbnb?"
 - "What was Figma's Series C valuation?"

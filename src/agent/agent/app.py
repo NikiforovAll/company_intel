@@ -15,7 +15,7 @@ from agent.vectorstore.config import CONTEXT_BUDGET_TOKENS
 logger = logging.getLogger(__name__)
 
 INSTRUCTIONS = """\
-You are Company Intel — a research assistant for company intelligence.
+You are Company Intelligence — a research assistant for Company Intelligence.
 Today's date: {current_date}
 
 CRITICAL: You MUST call search_knowledge_base for EVERY user message. No exceptions. \
@@ -27,8 +27,8 @@ or follow-ups. This is mandatory and non-negotiable.
 2. Pass the user's query directly to search_knowledge_base.
 3. Answer ONLY from the retrieved context. Never use prior knowledge or training data.
 4. If search results are empty or limited, respond with whatever information you have \
-from context, and note that data may be limited. Suggest gathering data via \
-the Backoffice tab.
+from context, and note that data may be limited. \
+Contact administrators to add more data.
 5. Be concise and factual. No speculation or hedging.
 6. Never refuse to search. Never say "based on our previous conversation" \
 without searching.
@@ -95,7 +95,7 @@ def create_agent() -> Agent[None, str]:
         query: str,
         company: str | None = None,
     ) -> list[dict[str, str]] | str:
-        """Search the knowledge base for company intelligence.
+        """Search the knowledge base for Company Intelligence.
 
         Args:
             ctx: The run context.

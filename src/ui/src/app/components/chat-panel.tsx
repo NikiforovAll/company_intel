@@ -1,14 +1,23 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { CopilotChat } from "@copilotkit/react-core/v2";
+import { CopilotChat, useConfigureSuggestions } from "@copilotkit/react-core/v2";
 
 interface ChatPanelProps {
   agentId: string;
   welcomeMessage: string;
+  suggestions?: { title: string; message: string }[];
 }
 
-export function ChatPanel({ agentId, welcomeMessage }: ChatPanelProps) {
+export function ChatPanel({ agentId, welcomeMessage, suggestions = [] }: ChatPanelProps) {
+  useConfigureSuggestions(
+    {
+      suggestions,
+      available: "before-first-message",
+      consumerAgentId: agentId,
+    },
+    [suggestions, agentId],
+  );
   const [chatKey, setChatKey] = useState(0);
 
   const handleNewConversation = useCallback(() => {

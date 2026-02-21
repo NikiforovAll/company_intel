@@ -38,13 +38,14 @@ class ScrapeJob:
 _scrape_jobs: dict[str, ScrapeJob] = {}
 
 BACKOFFICE_INSTRUCTIONS = """\
-You are the Company Intel Backoffice operator. You manage data gathering operations.
+You are the Company Intelligence Backoffice operator. \
+You manage data gathering operations.
 
 RULES:
 1. ALWAYS call a tool to perform operations. NEVER answer from memory or guess results.
 2. If the company name is ambiguous or misspelled, ask the user to confirm before
    proceeding. E.g., "Did you mean **Figma** or **Fig**?"
-3. For destructive operations (delete, re-gather), always confirm with the user first.
+3. For destructive operations (delete, gather), always confirm with the user first.
 4. Report the tool result to the user.
 5. If an operation fails, report the error clearly.
 6. Be concise and factual.

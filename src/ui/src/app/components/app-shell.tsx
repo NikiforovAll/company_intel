@@ -4,30 +4,37 @@ import { useState } from "react";
 import { CopilotKitProvider } from "@copilotkit/react-core/v2";
 import { ChatPanel } from "./chat-panel";
 import { HelpModal } from "./help-modal";
+import { AboutPanel } from "./about-panel";
 
-type Tab = "chat" | "backoffice";
+type Tab = "chat" | "backoffice" | "about";
 
 const tabs: { id: Tab; label: string; activeColor: string }[] = [
   { id: "chat", label: "Chat", activeColor: "text-blue-600 border-blue-600" },
   { id: "backoffice", label: "Backoffice", activeColor: "text-amber-600 border-amber-600" },
 ];
 
-const chatExamples = [
+const chatSuggestions = [
+  "What are the most successful companies recently?",
   "Who is PayPal's CEO?",
   "Honney allegations and involvement wiht PayPal",
-  "What is Spotify's business model?",
+  "What is Microsoft's business model?",
   "What are the latest new about Figma?",
   "When was Airbnb founded?",
   "How does Google make money?",
-  "What are the most successful companies recently?",
-];
+  "What are the key products of Apple?"
+].map((ex) => ({ title: ex, message: ex }));
 
-const backofficeExamples = [
+const backofficeSuggestions = [
+  "List all companies",
   "Gather data about Figma",
-  "Get info for Spotify",
+  "Add data about PayPal",
+  "Get information for Microsoft",
+  "Fetch information about Apple",
   "Delete all data for Airbnb",
-  "List gathered companies",
-];
+  "Check scrape status",
+  "Retrieve data for Google",
+  "Get information about Figma"
+].map((ex) => ({ title: ex, message: ex }));
 
 export function AppShell() {
   const [activeTab, setActiveTab] = useState<Tab>("chat");
@@ -36,7 +43,12 @@ export function AppShell() {
   return (
     <>
       <nav className="h-14 flex items-center gap-6 px-6 border-b border-gray-200 bg-white">
-        <span className="font-semibold text-gray-800 mr-4">Company Intel</span>
+        <button
+          onClick={() => setActiveTab("about")}
+          className="font-semibold text-gray-800 mr-4 cursor-pointer hover:text-blue-600 transition-colors"
+        >
+          Company Intelligence
+        </button>
         {tabs.map((tab) => (
           <button
             key={tab.id}
@@ -58,9 +70,11 @@ export function AppShell() {
         </button>
       </nav>
 
-      {helpOpen && (
+      {helpOpen && activeTab !== "about" && (
         <HelpModal activeTab={activeTab} onClose={() => setHelpOpen(false)} />
       )}
+
+      {activeTab === "about" && <AboutPanel />}
 
       <CopilotKitProvider runtimeUrl="/api/copilotkit">
         <div className={`h-[calc(100vh-3.5rem)] w-screen flex flex-col bg-gray-50 ${activeTab !== "chat" ? "hidden" : ""}`}>
@@ -68,23 +82,13 @@ export function AppShell() {
             <ChatPanel
               agentId="agentic_chat"
               welcomeMessage="What company would you like to know about?"
+              suggestions={chatSuggestions}
             />
           </div>
-          <footer className="border-t border-gray-200 bg-white px-8 py-3">
-            <div className="flex items-center gap-2.5 flex-wrap">
-              <span className="text-sm font-medium text-gray-400 uppercase tracking-wider mr-1">Try</span>
-              {chatExamples.map((ex) => (
-                <span
-                  key={ex}
-                  className="text-sm text-gray-500 bg-gray-50 border border-gray-200 rounded-full px-4 py-1.5 hover:bg-gray-100 cursor-default transition-colors"
-                >
-                  {ex}
-                </span>
-              ))}
-              <span className="ml-auto text-xs text-gray-300">
-                Answers from stored data only
-              </span>
-            </div>
+          <footer className="border-t border-gray-200 bg-white px-8 py-2">
+            <span className="text-xs text-gray-300">
+              Answers from stored data only
+            </span>
           </footer>
         </div>
 
@@ -93,23 +97,13 @@ export function AppShell() {
             <ChatPanel
               agentId="backoffice_ops"
               welcomeMessage="What data operation would you like to run?"
+              suggestions={backofficeSuggestions}
             />
           </div>
-          <footer className="border-t border-gray-200 bg-white px-8 py-3">
-            <div className="flex items-center gap-2.5 flex-wrap">
-              <span className="text-sm font-medium text-gray-400 uppercase tracking-wider mr-1">Try</span>
-              {backofficeExamples.map((ex) => (
-                <span
-                  key={ex}
-                  className="text-sm text-gray-500 bg-gray-50 border border-gray-200 rounded-full px-4 py-1.5 hover:bg-gray-100 cursor-default transition-colors"
-                >
-                  {ex}
-                </span>
-              ))}
-              <span className="ml-auto text-xs text-gray-300">
-                Gather &middot; Re-gather &middot; Delete &middot; List
-              </span>
-            </div>
+          <footer className="border-t border-gray-200 bg-white px-8 py-2">
+            <span className="text-xs text-gray-300">
+              Gather &middot; Re-gather &middot; Delete &middot; List
+            </span>
           </footer>
         </div>
       </CopilotKitProvider>

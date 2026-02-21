@@ -13,7 +13,7 @@ interface Tool {
 const chatTools: Tool[] = [
   {
     name: "search_knowledge_base",
-    description: "Search the knowledge base for company intelligence",
+    description: "Search the knowledge base for Company Intelligence",
     params: [
       { name: "query", type: "str" },
       { name: "company", type: "str", optional: true },

@@ -31,7 +31,7 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     logger.info("Agent service shutting down")
 
 
-app = FastAPI(title="Company Intel Agent", lifespan=lifespan)
+app = FastAPI(title="Company Intelligence Agent", lifespan=lifespan)
 logfire.instrument_fastapi(app, excluded_urls="/health")
 
 app.add_middleware(

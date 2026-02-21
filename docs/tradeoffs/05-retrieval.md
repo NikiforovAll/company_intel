@@ -4,7 +4,7 @@
 
 ## Why RRF for Company Intelligence
 
-Company intel queries fall into two distinct categories that **neither search method handles alone**:
+Company Intelligence queries fall into two distinct categories that **neither search method handles alone**:
 
 ### Semantic queries (dense vector wins)
 

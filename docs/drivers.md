@@ -73,7 +73,7 @@ No proprietary lock-in. Every component is replaceable.
 
 ### Vector Store: [Qdrant](https://qdrant.tech/)
 
-**Motivation:** Company intelligence queries are entity-heavy ("Who is the CEO?", "When was Series B?"). Pure vector search misses exact-term matches. Qdrant provides hybrid search (BM25 + dense vectors via RRF fusion) and pre-search filtering — both critical for retrieval quality. First-party Aspire integration avoids container hacks.
+**Motivation:** Company Intelligence queries are entity-heavy ("Who is the CEO?", "When was Series B?"). Pure vector search misses exact-term matches. Qdrant provides hybrid search (BM25 + dense vectors via RRF fusion) and pre-search filtering — both critical for retrieval quality. First-party Aspire integration avoids container hacks.
 
 **What it proves:** Hybrid search improves retrieval for entity-heavy domains. Pre-search filtering gives correct results when scoping to a specific company.
 

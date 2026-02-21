@@ -1,3 +1,3 @@
-"""Company Intel Agent."""
+"""Company Intelligence Agent."""
 
 __all__: list[str] = []
