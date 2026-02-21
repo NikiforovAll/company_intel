@@ -9,11 +9,14 @@ from qdrant_client.models import (
     Distance,
     FieldCondition,
     Filter,
+    Fusion,
+    FusionQuery,
     MatchValue,
     NamedSparseVector,
     NamedVector,
     PayloadSchemaType,
     PointStruct,
+    Prefetch,
     SparseVector,
     SparseVectorParams,
     VectorParams,
@@ -25,7 +28,11 @@ from agent.settings import get_settings
 from agent.vectorstore.config import (
     COLLECTION_NAME,
     DENSE_DIM,
+    DENSE_SCORE_THRESHOLD,
     DENSE_VECTOR_NAME,
+    SEARCH_DENSE_LIMIT,
+    SEARCH_FUSION_LIMIT,
+    SEARCH_SPARSE_LIMIT,
     SPARSE_VECTOR_NAME,
     UPSERT_BATCH_SIZE,
 )
@@ -118,6 +125,63 @@ class VectorStoreService:
 
         logger.info("Upserted %d points to Qdrant", total)
         return total
+
+    def search(
+        self,
+        dense_vector: list[float],
+        sparse_vector: EmbedSparseVector,
+        company: str | None = None,
+        limit: int = SEARCH_FUSION_LIMIT,
+    ) -> list[dict[str, str]]:
+        query_filter = None
+        if company:
+            query_filter = Filter(
+                must=[
+                    FieldCondition(
+                        key="company", match=MatchValue(value=company.strip().lower())
+                    )
+                ]
+            )
+
+        response = self._client.query_points(
+            collection_name=COLLECTION_NAME,
+            prefetch=[
+                Prefetch(
+                    query=dense_vector,
+                    using=DENSE_VECTOR_NAME,
+                    score_threshold=DENSE_SCORE_THRESHOLD,
+                    limit=SEARCH_DENSE_LIMIT,
+                ),
+                Prefetch(
+                    query=SparseVector(
+                        indices=sparse_vector.indices,
+                        values=sparse_vector.values,
+                    ),
+                    using=SPARSE_VECTOR_NAME,
+                    limit=SEARCH_SPARSE_LIMIT,
+                ),
+            ],
+            query=FusionQuery(fusion=Fusion.RRF),
+            query_filter=query_filter,
+            limit=limit,
+            with_payload=True,
+        )
+
+        results: list[dict[str, str]] = []
+        for point in response.points:
+            p = point.payload or {}
+            results.append(
+                {
+                    "url": p.get("url", ""),
+                    "title": p.get("title", ""),
+                    "company": p.get("company", ""),
+                    "source_type": p.get("source_type", ""),
+                    "text": p.get("text", ""),
+                }
+            )
+
+        logger.info("Hybrid search returned %d results", len(results))
+        return results
 
     def delete_company(self, company: str) -> int:
         result = self._client.count(

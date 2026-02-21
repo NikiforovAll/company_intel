@@ -41,3 +41,16 @@ Improvements we recognize but deliberately defer. Each entry explains what we'd 
 **Improvement**: Extract structured fields (founded date, CEO, funding rounds, revenue, employee count) into a separate store or Qdrant payload fields. Enable direct field lookups ("When was Figma founded?" → exact answer without retrieval) and comparative queries ("Compare funding of Figma vs Canva").
 
 **Why not yet**: Requires source-specific extraction logic (Crunchbase schema differs from Wikipedia infoboxes). The unstructured RAG approach handles these queries acceptably for a POC. Structured extraction is a significant scope increase with diminishing returns until source coverage (Phase 4) is complete.
+
+## 6. Conversation Length Management (Context Window)
+
+**Current**: Chat agent sends the full conversation history to the LLM on every turn. With Qwen3 8B's 32K context window, long conversations will eventually exceed the limit — causing truncation, degraded answers, or outright failures.
+
+**Improvement**: Implement a conversation management strategy. Options (not mutually exclusive):
+
+- **Sliding window**: Keep only the last N turns, drop older messages.
+- **Conversation summarization**: Periodically summarize older turns into a compact system message, preserving key facts while freeing token budget.
+- **Token-aware truncation**: Count tokens before each request; when approaching the limit, trigger summarization or trim oldest turns.
+- **Explicit "new topic" reset**: Let the user clear history via UI when switching topics.
+
+**Why not yet**: POC conversations are short (5-15 turns). The 32K window is sufficient for demo scenarios. Summarization adds latency and complexity (extra LLM call per summarization cycle). Worth addressing once real usage patterns reveal actual conversation lengths.

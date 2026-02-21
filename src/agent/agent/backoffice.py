@@ -147,33 +147,30 @@ def create_backoffice_agent() -> Agent[None, str]:
             company_name: The company name to gather data for.
         """
         normalized = company_name.strip().lower()
-        logger.info(
-            "gather_company_data called",
-            extra={"company": normalized},
-        )
+        with logfire.span("gather_company_data", company=normalized):
+            existing = _scrape_jobs.get(normalized)
+            if existing and existing.status == "running":
+                return (
+                    f"Gathering for '{company_name}' is already "
+                    f"in progress "
+                    f"(started {existing.started_at.isoformat()})."
+                )
 
-        existing = _scrape_jobs.get(normalized)
-        if existing and existing.status == "running":
-            return (
-                f"Gathering for '{company_name}' is already in progress "
-                f"(started {existing.started_at.isoformat()})."
+            _scrape_jobs[normalized] = ScrapeJob(
+                company=normalized,
+                status="running",
+                started_at=datetime.now(UTC),
             )
 
-        _scrape_jobs[normalized] = ScrapeJob(
-            company=normalized,
-            status="running",
-            started_at=datetime.now(UTC),
-        )
+            task = asyncio.create_task(_run_scrape(normalized, settings.data_dir))
+            _background_tasks.add(task)
+            task.add_done_callback(_background_tasks.discard)
 
-        task = asyncio.create_task(_run_scrape(normalized, settings.data_dir))
-        _background_tasks.add(task)
-        task.add_done_callback(_background_tasks.discard)
-
-        return (
-            f"Gathering started for '{company_name}'. "
-            "Scraping is running in the background — "
-            "use check_scrape_status to monitor progress."
-        )
+            return (
+                f"Gathering started for '{company_name}'. "
+                "Scraping is running in the background — "
+                "use check_scrape_status to monitor progress."
+            )
 
     @agent.tool
     async def check_scrape_status(
@@ -190,27 +187,28 @@ def create_backoffice_agent() -> Agent[None, str]:
             company_name: The company name to check.
         """
         normalized = company_name.strip().lower()
-        job = _scrape_jobs.get(normalized)
-        if job is None:
-            return {"status": "not_found", "company": normalized}
+        with logfire.span("check_scrape_status", company=normalized):
+            job = _scrape_jobs.get(normalized)
+            if job is None:
+                return {"status": "not_found", "company": normalized}
 
-        info: dict[str, object] = {
-            "company": job.company,
-            "status": job.status,
-            "started_at": job.started_at.isoformat(),
-        }
-        if job.finished_at:
-            info["finished_at"] = job.finished_at.isoformat()
-        if job.result:
-            info["total_documents"] = job.result.total_documents
-            info["website_pages"] = job.result.website_pages
-            info["search_pages"] = job.result.search_pages
-            info["wikipedia_scraped"] = job.result.wikipedia_scraped
-        if job.error:
-            info["error"] = job.error
-        if job.errors:
-            info["scrape_errors"] = job.errors
-        return info
+            info: dict[str, object] = {
+                "company": job.company,
+                "status": job.status,
+                "started_at": job.started_at.isoformat(),
+            }
+            if job.finished_at:
+                info["finished_at"] = job.finished_at.isoformat()
+            if job.result:
+                info["total_documents"] = job.result.total_documents
+                info["website_pages"] = job.result.website_pages
+                info["search_pages"] = job.result.search_pages
+                info["wikipedia_scraped"] = job.result.wikipedia_scraped
+            if job.error:
+                info["error"] = job.error
+            if job.errors:
+                info["scrape_errors"] = job.errors
+            return info
 
     @agent.tool
     async def list_gathered_companies(
@@ -221,8 +219,8 @@ def create_backoffice_agent() -> Agent[None, str]:
         Args:
             ctx: The run context.
         """
-        logger.info("list_gathered_companies called")
-        return list_companies(settings.data_dir)
+        with logfire.span("list_gathered_companies"):
+            return list_companies(settings.data_dir)
 
     @agent.tool
     async def delete_company_data(
@@ -236,24 +234,23 @@ def create_backoffice_agent() -> Agent[None, str]:
             company_name: The company name to delete data for.
         """
         normalized = company_name.strip().lower()
-        logger.info("delete_company_data called", extra={"company": normalized})
+        with logfire.span("delete_company_data", company=normalized):
+            store = get_vectorstore()
+            deleted_points = store.delete_company(normalized)
 
-        store = get_vectorstore()
-        deleted_points = store.delete_company(normalized)
-
-        raw_dir = settings.data_dir / normalized / "raw"
-        if raw_dir.exists():
-            wipe_raw_data(normalized, settings.data_dir)
-            _scrape_jobs.pop(normalized, None)
-            return (
-                f"Deleted all data for '{company_name}' "
-                f"({deleted_points} vectors removed)."
-            )
-        if deleted_points > 0:
-            return (
-                f"Deleted {deleted_points} vectors for '{company_name}' "
-                "(no raw files found)."
-            )
-        return f"No data found for '{company_name}'."
+            raw_dir = settings.data_dir / normalized / "raw"
+            if raw_dir.exists():
+                wipe_raw_data(normalized, settings.data_dir)
+                _scrape_jobs.pop(normalized, None)
+                return (
+                    f"Deleted all data for '{company_name}' "
+                    f"({deleted_points} vectors removed)."
+                )
+            if deleted_points > 0:
+                return (
+                    f"Deleted {deleted_points} vectors for "
+                    f"'{company_name}' (no raw files found)."
+                )
+            return f"No data found for '{company_name}'."
 
     return agent

@@ -57,6 +57,7 @@ def configure_telemetry() -> None:
     logfire.configure(
         service_name="company-intel-agent",
         send_to_logfire=False,
+        inspect_arguments=False,
         metrics=logfire.MetricsOptions(
             additional_readers=[
                 PeriodicExportingMetricReader(OTLPMetricExporter()),

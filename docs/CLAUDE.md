@@ -33,6 +33,7 @@ Each doc compares alternatives and documents the decision.
 | ---------------------------------------------------------------- | ----------------------------------------------------------- |
 | [implementation/scraper.md](implementation/scraper.md)           | Scraper pipeline: Crawl4AI, URL resolution, text cleaning   |
 | [implementation/chunking-embedding.md](implementation/chunking-embedding.md) | Chunking, embedding & Qdrant ingestion pipeline |
+| [implementation/retrieval.md](implementation/retrieval.md)       | Hybrid retrieval: RRF fusion, context budget, chat agent wiring |
 
 ## Misc
 

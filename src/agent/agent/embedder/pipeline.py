@@ -77,6 +77,10 @@ class EmbedderService:
             )
         return results
 
+    async def embed_query(self, text: str) -> tuple[list[float], SparseVector]:
+        dense, sparse = await self.embed_texts([text])
+        return dense[0], sparse[0]
+
 
 @lru_cache(maxsize=1)
 def get_embedder() -> EmbedderService:
