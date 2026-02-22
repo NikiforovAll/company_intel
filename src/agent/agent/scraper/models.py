@@ -23,6 +23,7 @@ class ScrapeResult(BaseModel):
     website_pages: int
     search_pages: int
     wikipedia_scraped: bool
+    wikipedia_pages: int = 0
     total_documents: int
     errors: list[str]
 
@@ -31,6 +32,7 @@ class ScrapeResult(BaseModel):
 class WikipediaResult:
     document: RawDocument | None
     official_website: str | None
+    related_documents: list[RawDocument] = field(default_factory=list)
 
 
 @dataclass

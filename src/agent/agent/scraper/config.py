@@ -4,12 +4,12 @@ from __future__ import annotations
 
 # -- Website deep crawl (homepage BFS) --
 WEBSITE_MAX_DEPTH = 2
-WEBSITE_MAX_PAGES = 10
+WEBSITE_MAX_PAGES = 20
 
 # -- Company pages shallow crawl (newsroom, about, blog) --
 COMPANY_PAGES_MAX_DEPTH = 1
-COMPANY_PAGES_MAX_PAGES = 5
-COMPANY_PAGES_MAX_SEEDS = 3
+COMPANY_PAGES_MAX_PAGES = 10
+COMPANY_PAGES_MAX_SEEDS = 5
 
 # -- Search results scrape --
 SEARCH_MAX_URLS = 10
@@ -24,6 +24,7 @@ EXCLUDED_TAGS = ["nav", "footer", "header", "aside", "form"]
 
 # -- Wikipedia --
 WIKIPEDIA_MAX_RETRIES = 3
+WIKIPEDIA_RELATED_LIMIT = 4  # extra articles whose title contains the company name
 WIKIPEDIA_CSS_SELECTOR = "div#mw-content-text"
 WIKIPEDIA_EXCLUDED_SELECTOR = ".reflist, .navbox, .hatnote, .sidebar, .infobox"
 WIKIPEDIA_API = "https://en.wikipedia.org/w/api.php"

@@ -25,15 +25,20 @@ artifacts/data/{company}/raw/*.md
 - `config.py` — collection `company_intel`, batch size 100
 - `client.py` — `VectorStoreService`: Qdrant client with auto-collection creation, payload indexes on `company` and `source_type`
 
+### `agent/ingestion/`
+- `models.py` — `IngestionResult` (company, documents_loaded, chunks_produced, vectors_stored)
+- `pipeline.py` — `ingest_company()`: orchestrates load → chunk → embed → upsert
+
 ## Integration Points
 
 ### Backoffice Pipeline (`agent/backoffice.py`)
-After `scrape_company()` succeeds, `_ingest_to_vectorstore()` runs:
+After `scrape_company()` succeeds, `ingest_company()` (from `agent.ingestion`) runs:
 1. Delete existing vectors for the company (idempotent re-gather)
 2. Load raw documents from disk
 3. Chunk documents
 4. Embed (dense + sparse)
 5. Upsert to Qdrant
+6. Return `IngestionResult` with stats
 
 ### Delete Operation
 `delete_company_data` tool also calls `store.delete_company()` to wipe vectors.

@@ -9,11 +9,10 @@ from pathlib import Path
 import logfire
 from pydantic_ai import Agent, RunContext
 
-from agent.chunker import chunk_documents
-from agent.embedder import get_embedder
+from agent.ingestion import IngestionResult, ingest_company
 from agent.scraper import scrape_company
 from agent.scraper.models import ScrapeResult
-from agent.scraper.storage import list_companies, load_raw_documents, wipe_raw_data
+from agent.scraper.storage import list_companies, wipe_raw_data
 from agent.settings import get_settings
 from agent.vectorstore import get_vectorstore
 
@@ -30,6 +29,7 @@ class ScrapeJob:
     started_at: datetime
     finished_at: datetime | None = None
     result: ScrapeResult | None = None
+    ingestion_result: IngestionResult | None = None
     error: str | None = None
     errors: list[str] = field(default_factory=list)
 
@@ -45,47 +45,17 @@ RULES:
 1. ALWAYS call a tool to perform operations. NEVER answer from memory or guess results.
 2. If the company name is ambiguous or misspelled, ask the user to confirm before
    proceeding. E.g., "Did you mean **Figma** or **Fig**?"
-3. For destructive operations (delete, gather), always confirm with the user first.
-4. Report the tool result to the user.
-5. If an operation fails, report the error clearly.
-6. Be concise and factual.
-7. Gathering runs in the background. The tool returns immediately.
+3. Report the tool result to the user.
+4. If an operation fails, report the error clearly.
+5. Be concise and factual.
+6. Gathering runs in the background. The tool returns immediately.
    Use check_scrape_status to monitor progress and see errors.
-8. You can assume company name if it can be inferred from the context
+7. You can assume company name if it can be inferred from the context
 
 FORMAT:
 - State what action was performed and the result.
 - For list operations, use a numbered list.
 """
-
-
-async def _ingest_to_vectorstore(company: str, data_dir: Path) -> int:
-    with logfire.span("ingest_to_vectorstore {company}", company=company):
-        store = get_vectorstore()
-        store.delete_company(company)
-
-        docs = load_raw_documents(company, data_dir)
-        if not docs:
-            logger.warning("No raw documents to ingest for '%s'", company)
-            return 0
-
-        chunks = chunk_documents(docs)
-        if not chunks:
-            logger.warning("No chunks produced for '%s'", company)
-            return 0
-
-        embedder = get_embedder()
-        texts = [c.text for c in chunks]
-        dense, sparse = await embedder.embed_texts(texts)
-
-        total = store.upsert_chunks(chunks, dense, sparse)
-        logger.info(
-            "Ingested %d chunks for '%s' (%d docs)",
-            total,
-            company,
-            len(docs),
-        )
-        return total
 
 
 async def _run_scrape(company: str, data_dir: object) -> None:
@@ -110,7 +80,7 @@ async def _run_scrape(company: str, data_dir: object) -> None:
                 len(result.errors),
             )
 
-            await _ingest_to_vectorstore(company, Path(str(data_dir)))
+            job.ingestion_result = await ingest_company(company, Path(str(data_dir)))
 
             job.status = "done"
             job.finished_at = datetime.now(UTC)
@@ -205,6 +175,11 @@ def create_backoffice_agent() -> Agent[None, str]:
                 info["website_pages"] = job.result.website_pages
                 info["search_pages"] = job.result.search_pages
                 info["wikipedia_scraped"] = job.result.wikipedia_scraped
+                info["wikipedia_pages"] = job.result.wikipedia_pages
+            if job.ingestion_result:
+                info["documents_loaded"] = job.ingestion_result.documents_loaded
+                info["chunks_produced"] = job.ingestion_result.chunks_produced
+                info["vectors_stored"] = job.ingestion_result.vectors_stored
             if job.error:
                 info["error"] = job.error
             if job.errors:

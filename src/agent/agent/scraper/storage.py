@@ -27,16 +27,13 @@ def save_raw_documents(
     target = _raw_dir(company, base_dir)
     target.mkdir(parents=True, exist_ok=True)
 
-    counters: dict[str, int] = {"website": 0, "search": 0}
+    counters: dict[str, int] = {"website": 0, "search": 0, "wikipedia": 0}
     count = 0
 
     for doc in documents:
-        if doc.source_type == "wikipedia":
-            filename = "wikipedia.md"
-        else:
-            counters[doc.source_type] = counters.get(doc.source_type, 0) + 1
-            idx = counters[doc.source_type]
-            filename = f"{doc.source_type}_{idx:03d}.md"
+        counters[doc.source_type] = counters.get(doc.source_type, 0) + 1
+        idx = counters[doc.source_type]
+        filename = f"{doc.source_type}_{idx:03d}.md"
 
         frontmatter = (
             f"---\n"

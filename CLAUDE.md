@@ -18,6 +18,7 @@ src/ui/        → Next.js 15 frontend (CopilotKit + AG-UI streaming)
 - `main.py` — FastAPI app, two POST endpoints: `/` (chat agent), `/backoffice` (backoffice agent)
 - `agent/app.py` — Chat agent: `search_knowledge_base` tool, citation-based answers
 - `agent/backoffice.py` — Backoffice agent: `gather_company_data`, `list_gathered_companies`, `delete_company_data`
+- `agent/ingestion/pipeline.py` — Ingestion pipeline: load → chunk → embed → upsert to Qdrant
 - `agent/settings.py` — Reads Aspire connection string `ConnectionStrings__ollama-qwen3`, configures Ollama endpoint
 - `agent/telemetry.py` — OpenTelemetry via Logfire (HTTP/protobuf for Aspire dashboard, explicit bucket histograms)
 - Agents use **AG-UI protocol** via `pydantic_ai.ui.ag_ui.AGUIAdapter` for SSE streaming
