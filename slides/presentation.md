@@ -71,6 +71,24 @@ User: "ingest Figma"              User: "Who are competitors?"
 
 ---
 
+# Backoffice — Data Ingestion
+
+![center](./img/backoffice_01.png)
+
+---
+
+# Chat — Q&A with Citations
+
+![center](./img/chat-02.png)
+
+---
+
+# Chat — Detailed Research
+
+![center](./img/chat-03.png)
+
+---
+
 ![bg fit](./img/bg-slide-alt2.png)
 
 # Tech Stack
@@ -208,6 +226,18 @@ User query
 - Traces for: scraping, chunking, embedding, retrieval, generation
 - GenAI semantic conventions — token usage per LLM call
 - End-to-end distributed tracing across all services
+
+---
+
+# Distributed Traces
+
+![center](./img/backoffice_02.png)
+
+---
+
+# Scraper Metrics
+
+![center](./img/backoffice_03.png)
 
 ---
 
