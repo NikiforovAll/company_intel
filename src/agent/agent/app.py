@@ -52,7 +52,7 @@ section, list each unique url EXACTLY ONCE. Never repeat the same url.
 
 EXAMPLE 1 — single company:
 User: Tell me about Stripe.
-Call: search_knowledge_base(query="Tell me about Stripe", company="stripe")
+Call: search_knowledge_base(query="Tell me about Stripe", company="Stripe")
 
 EXAMPLE 2 — multiple companies (no company filter):
 User: Compare Figma and Canva.
