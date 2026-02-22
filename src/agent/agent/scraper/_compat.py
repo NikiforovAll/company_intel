@@ -14,7 +14,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from opentelemetry import context as otel_context
 
-_pool = ThreadPoolExecutor(max_workers=2, thread_name_prefix="crawl4ai")
+_pool = ThreadPoolExecutor(max_workers=4, thread_name_prefix="crawl4ai")
 
 
 def _run_in_new_loop[T](fn: Callable[[], Awaitable[T]], ctx: otel_context.Context) -> T:

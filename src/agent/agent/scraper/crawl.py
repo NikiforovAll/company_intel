@@ -46,7 +46,15 @@ from agent.scraper.config import (
     WIKIPEDIA_CSS_SELECTOR,
     WIKIPEDIA_EXCLUDED_SELECTOR,
     WIKIPEDIA_MAX_RETRIES,
+    WIKIPEDIA_RELATED_LIMIT,
     WIKIPEDIA_USER_AGENT,
+)
+from agent.scraper.metrics import (
+    active_browsers,
+    page_content_size,
+    pages_dropped,
+    pages_scraped,
+    scrape_errors,
 )
 from agent.scraper.models import RawDocument, SearchResults, SourceType, WikipediaResult
 
@@ -114,25 +122,44 @@ def _build_wikipedia_config() -> CrawlerRunConfig:
 
 
 async def _crawl_pages(url: str, config: CrawlerRunConfig) -> list[object]:
-    async with AsyncWebCrawler(config=BROWSER_CONFIG) as crawler:
-        results = await crawler.arun(url=url, config=config)
-        return results if isinstance(results, list) else [results]
+    active_browsers.add(1)
+    try:
+        async with AsyncWebCrawler(config=BROWSER_CONFIG) as crawler:
+            results = await crawler.arun(url=url, config=config)
+            return results if isinstance(results, list) else [results]
+    finally:
+        active_browsers.add(-1)
 
 
 async def _crawl_single_with_retry(
-    url: str, config: CrawlerRunConfig, max_retries: int = WIKIPEDIA_MAX_RETRIES
+    url: str,
+    config: CrawlerRunConfig,
+    max_retries: int = WIKIPEDIA_MAX_RETRIES,
+    crawler: AsyncWebCrawler | None = None,
 ) -> object:
     delay = 1.0
     last_result = None
-    async with AsyncWebCrawler(config=BROWSER_CONFIG) as crawler:
-        for attempt in range(max_retries):
-            result = await crawler.arun(url=url, config=config)
+    for attempt in range(max_retries):
+        try:
+            if crawler is not None:
+                result = await crawler.arun(url=url, config=config)
+            else:
+                async with AsyncWebCrawler(config=BROWSER_CONFIG) as c:
+                    result = await c.arun(url=url, config=config)
             if getattr(result, "success", False):
                 return result
             last_result = result
-            if attempt < max_retries - 1:
-                await asyncio.sleep(delay)
-                delay *= 2
+        except Exception:
+            logger.warning(
+                "Browser connection failed for %s (attempt %d/%d)",
+                url,
+                attempt + 1,
+                max_retries,
+            )
+            last_result = None
+        if attempt < max_retries - 1:
+            await asyncio.sleep(delay)
+            delay *= 2
     return last_result  # type: ignore[return-value]
 
 
@@ -140,18 +167,64 @@ async def _crawl_urls_sequentially(
     urls: list[str], config: CrawlerRunConfig
 ) -> list[tuple[str, object]]:
     results: list[tuple[str, object]] = []
-    async with AsyncWebCrawler(config=BROWSER_CONFIG) as crawler:
-        for url in urls[:SEARCH_MAX_URLS]:
-            try:
-                result = await asyncio.wait_for(
-                    crawler.arun(url=url, config=config),
-                    timeout=SEARCH_PER_URL_TIMEOUT,
-                )
-                results.append((url, result))
-            except TimeoutError:
-                logger.warning("Timeout scraping %s, skipping", url)
-            await asyncio.sleep(MEAN_DELAY)
+    active_browsers.add(1)
+    try:
+        async with AsyncWebCrawler(config=BROWSER_CONFIG) as crawler:
+            for url in urls[:SEARCH_MAX_URLS]:
+                try:
+                    result = await asyncio.wait_for(
+                        crawler.arun(url=url, config=config),
+                        timeout=SEARCH_PER_URL_TIMEOUT,
+                    )
+                    results.append((url, result))
+                except TimeoutError:
+                    logger.warning("Timeout scraping %s, skipping", url)
+                await asyncio.sleep(MEAN_DELAY)
+    finally:
+        active_browsers.add(-1)
     return results
+
+
+async def _crawl_pages_batch(
+    urls: list[str], config: CrawlerRunConfig
+) -> list[tuple[str, list[object]]]:
+    """Open one browser, BFS-crawl each seed URL sequentially."""
+    results: list[tuple[str, list[object]]] = []
+    active_browsers.add(1)
+    try:
+        async with AsyncWebCrawler(config=BROWSER_CONFIG) as crawler:
+            for url in urls:
+                try:
+                    items = await crawler.arun(url=url, config=config)
+                    items = items if isinstance(items, list) else [items]
+                    results.append((url, items))
+                except Exception:
+                    logger.exception("BFS crawl failed for %s", url)
+                    results.append((url, []))
+    finally:
+        active_browsers.add(-1)
+    return results
+
+
+async def _scrape_wiki_batch(
+    titles: list[str],
+    company: str,
+    config: CrawlerRunConfig,
+    now: datetime,
+) -> list[RawDocument | None]:
+    """Scrape multiple Wikipedia pages reusing one browser."""
+    active_browsers.add(1)
+    try:
+        async with AsyncWebCrawler(config=BROWSER_CONFIG) as crawler:
+            results: list[RawDocument | None] = []
+            for title in titles:
+                doc = await _scrape_wiki_page(
+                    title, company, config, now, crawler=crawler
+                )
+                results.append(doc)
+            return results
+    finally:
+        active_browsers.add(-1)
 
 
 # --- Public functions (OTel spans + processing on main loop) ---
@@ -164,19 +237,26 @@ def _process_crawl_result(
     company: str,
     now: datetime,
 ) -> RawDocument | None:
+    attrs = {"source_type": source_type, "company": company}
     raw_md = _extract_fit_markdown(result)
     if not raw_md:
         logger.debug("No markdown for %s", url)
+        pages_dropped.add(1, {**attrs, "reason": "no_markdown"})
         return None
 
     cleaned = clean_text(raw_md)
     if cleaned is None:
         logger.debug("Content too short for %s (%d raw chars)", url, len(raw_md))
+        pages_dropped.add(1, {**attrs, "reason": "too_short"})
         return None
 
     if not is_english(cleaned):
         logger.debug("Non-English content for %s", url)
+        pages_dropped.add(1, {**attrs, "reason": "not_english"})
         return None
+
+    pages_scraped.add(1, attrs)
+    page_content_size.record(len(cleaned), attrs)
 
     title = ""
     meta = getattr(result, "metadata", None)
@@ -210,6 +290,9 @@ async def scrape_website(url: str, company: str) -> tuple[list[RawDocument], lis
                 if not getattr(result, "success", False):
                     err_msg = getattr(result, "error_message", "Unknown error")
                     errors.append(f"{page_url}: {err_msg}")
+                    scrape_errors.add(
+                        1, {"error_type": "crawl_error", "phase": "website_bfs"}
+                    )
                     continue
 
                 doc = _process_crawl_result(result, page_url, "website", company, now)
@@ -218,9 +301,11 @@ async def scrape_website(url: str, company: str) -> tuple[list[RawDocument], lis
         except asyncio.CancelledError:
             logger.warning("Website scrape cancelled for %s", url)
             errors.append(f"Website scrape cancelled for {url}")
+            scrape_errors.add(1, {"error_type": "cancelled", "phase": "website_bfs"})
         except Exception:
             logger.exception("Website scrape failed for %s", url)
             errors.append(f"Website scrape failed for {url}")
+            scrape_errors.add(1, {"error_type": "unknown", "phase": "website_bfs"})
 
         span.set_attribute("pages_scraped", len(documents))
         span.set_attribute("error_count", len(errors))
@@ -242,42 +327,54 @@ async def scrape_company_pages(
     if not urls:
         return documents, errors
 
-    logger.info("Crawling %d company pages for %s: %s", len(urls), company, urls)
+    seed_urls = [u for u in urls[:COMPANY_PAGES_MAX_SEEDS] if u not in seen]
+    if not seed_urls:
+        return documents, errors
+
+    logger.info(
+        "Crawling %d company pages for %s: %s",
+        len(seed_urls),
+        company,
+        seed_urls,
+    )
 
     with logfire.span(
         "scrape_company_pages {company}",
         company=company,
-        url_count=len(urls),
+        url_count=len(seed_urls),
     ) as span:
         config = _build_bfs_config(COMPANY_PAGES_MAX_DEPTH, COMPANY_PAGES_MAX_PAGES)
-        for url in urls[:COMPANY_PAGES_MAX_SEEDS]:
-            if url in seen:
-                continue
-            try:
-                items = await run_in_crawler_thread(
-                    lambda u=url: _crawl_pages(u, config)  # type: ignore[misc]
-                )
+        try:
+            batch_results = await run_in_crawler_thread(
+                lambda: _crawl_pages_batch(seed_urls, config)
+            )
+            for _seed_url, items in batch_results:
                 for result in items:
-                    page_url = getattr(result, "url", url)
+                    page_url = getattr(result, "url", _seed_url)
                     if page_url in seen:
                         continue
                     seen.add(page_url)
                     if not getattr(result, "success", False):
                         err = getattr(result, "error_message", "Unknown")
                         errors.append(f"{page_url}: {err}")
+                        scrape_errors.add(
+                            1,
+                            {"error_type": "crawl_error", "phase": "company_pages"},
+                        )
                         continue
                     doc = _process_crawl_result(
                         result, page_url, "website", company, now
                     )
                     if doc:
                         documents.append(doc)
-            except asyncio.CancelledError:
-                logger.warning("Company page crawl cancelled for %s", url)
-                errors.append(f"Company page crawl cancelled for {url}")
-                break
-            except Exception:
-                logger.exception("Company page crawl failed for %s", url)
-                errors.append(f"Company page crawl failed for {url}")
+        except asyncio.CancelledError:
+            logger.warning("Company page crawl cancelled for %s", company)
+            errors.append(f"Company page crawl cancelled for {company}")
+            scrape_errors.add(1, {"error_type": "cancelled", "phase": "company_pages"})
+        except Exception:
+            logger.exception("Company page crawl failed for %s", company)
+            errors.append(f"Company page crawl failed for {company}")
+            scrape_errors.add(1, {"error_type": "unknown", "phase": "company_pages"})
 
         span.set_attribute("pages_scraped", len(documents))
         span.set_attribute("error_count", len(errors))
@@ -285,13 +382,14 @@ async def scrape_company_pages(
     return documents, errors
 
 
-async def _wikipedia_search(company: str) -> str | None:
+async def _wikipedia_search(company: str) -> tuple[str | None, list[str]]:
+    """Return (primary_title, related_titles) from Wikipedia search."""
     params: dict[str, str | int] = {
         "action": "query",
         "list": "search",
         "srsearch": f"{company} company",
         "format": "json",
-        "srlimit": 1,
+        "srlimit": 5,
     }
     async with httpx.AsyncClient(timeout=15, headers=_WIKIPEDIA_HEADERS) as client:
         resp = await client.get(WIKIPEDIA_API, params=params)
@@ -300,8 +398,30 @@ async def _wikipedia_search(company: str) -> str | None:
 
     results = data.get("query", {}).get("search", [])
     if not results:
-        return None
-    return str(results[0]["title"])
+        return None, []
+
+    # Prefer exact title match over Wikipedia's default ranking
+    company_lower = company.lower()
+    primary: str | None = None
+    for r in results:
+        if r["title"].lower() == company_lower:
+            primary = str(r["title"])
+            break
+    if primary is None:
+        primary = str(results[0]["title"])
+
+    # Collect related articles whose title contains the company name
+    related: list[str] = []
+    for r in results:
+        title = str(r["title"])
+        if title == primary:
+            continue
+        if company_lower in title.lower():
+            related.append(title)
+        if len(related) >= WIKIPEDIA_RELATED_LIMIT:
+            break
+
+    return primary, related
 
 
 async def _wikipedia_official_url(title: str) -> str | None:
@@ -510,6 +630,9 @@ async def scrape_search_results(
                     err = getattr(result, "error_message", "Unknown")
                     logger.warning("Scrape failed %s: %s", url, err)
                     errors.append(f"{url}: {err}")
+                    scrape_errors.add(
+                        1, {"error_type": "crawl_error", "phase": "search_results"}
+                    )
                     continue
 
                 doc = _process_crawl_result(result, url, "search", company, now)
@@ -520,9 +643,11 @@ async def scrape_search_results(
         except (TimeoutError, asyncio.CancelledError):
             logger.warning("Search results scrape timed out for %s", company)
             errors.append(f"Search results scrape timed out for {company}")
+            scrape_errors.add(1, {"error_type": "timeout", "phase": "search_results"})
         except Exception:
             logger.exception("Search results scrape failed for %s", company)
             errors.append(f"Search results scrape failed for {company}")
+            scrape_errors.add(1, {"error_type": "unknown", "phase": "search_results"})
 
         span.set_attribute("pages_scraped", len(documents))
         span.set_attribute("error_count", len(errors))
@@ -530,48 +655,74 @@ async def scrape_search_results(
     return documents, errors
 
 
+async def _scrape_wiki_page(
+    title: str,
+    company: str,
+    config: CrawlerRunConfig,
+    now: datetime,
+    crawler: AsyncWebCrawler | None = None,
+) -> RawDocument | None:
+    wiki_url = f"https://en.wikipedia.org/wiki/{quote(title.replace(' ', '_'))}"
+    try:
+        if crawler is not None:
+            result = await _crawl_single_with_retry(wiki_url, config, crawler=crawler)
+        else:
+            result = await run_in_crawler_thread(
+                lambda url=wiki_url: _crawl_single_with_retry(url, config)  # type: ignore[misc]
+            )
+        if not getattr(result, "success", False):
+            err = getattr(result, "error_message", "Unknown")
+            logger.warning("Wikipedia scrape failed for %s: %s", wiki_url, err)
+            scrape_errors.add(1, {"error_type": "crawl_error", "phase": "wikipedia"})
+            return None
+        doc = _process_crawl_result(result, wiki_url, "wikipedia", company, now)
+        if doc:
+            doc.title = title
+        return doc
+    except Exception:
+        logger.exception("Wikipedia scrape failed for %s", wiki_url)
+        scrape_errors.add(1, {"error_type": "unknown", "phase": "wikipedia"})
+        return None
+
+
 async def scrape_wikipedia(company: str) -> WikipediaResult:
     with logfire.span("scrape_wikipedia {company}", company=company) as span:
-        title = await _wikipedia_search(company)
-        if title is None:
+        primary_title, related_titles = await _wikipedia_search(company)
+        if primary_title is None:
             logger.info("No Wikipedia article found for %s", company)
             span.set_attribute("found", False)
             return WikipediaResult(document=None, official_website=None)
 
-        span.set_attribute("article_title", title)
+        span.set_attribute("article_title", primary_title)
+        if related_titles:
+            span.set_attribute("related_titles", related_titles)
 
         official_url: str | None = None
         try:
-            official_url = await _wikipedia_official_url(title)
+            official_url = await _wikipedia_official_url(primary_title)
         except Exception:
             logger.exception("Failed to extract official URL from Wikipedia infobox")
 
         if official_url:
             span.set_attribute("official_website", official_url)
 
-        wiki_url = f"https://en.wikipedia.org/wiki/{quote(title.replace(' ', '_'))}"
         now = datetime.now(UTC)
+        config = _build_wikipedia_config()
 
-        try:
-            config = _build_wikipedia_config()
-            result = await run_in_crawler_thread(
-                lambda: _crawl_single_with_retry(wiki_url, config)
-            )
+        all_titles = [primary_title, *related_titles]
+        all_docs = await run_in_crawler_thread(
+            lambda: _scrape_wiki_batch(all_titles, company, config, now)
+        )
 
-            if not getattr(result, "success", False):
-                err = getattr(result, "error_message", "Unknown")
-                logger.warning("Wikipedia scrape failed for %s: %s", wiki_url, err)
-                span.set_attribute("found", False)
-                return WikipediaResult(document=None, official_website=official_url)
+        primary_doc = all_docs[0] if all_docs else None
+        related_docs = [d for d in all_docs[1:] if d is not None]
 
-            doc = _process_crawl_result(result, wiki_url, "wikipedia", company, now)
-            if doc:
-                doc.title = title
+        span.set_attribute("found", primary_doc is not None)
+        if related_docs:
+            span.set_attribute("related_scraped", len(related_docs))
 
-            span.set_attribute("found", doc is not None)
-            return WikipediaResult(document=doc, official_website=official_url)
-
-        except Exception:
-            logger.exception("Wikipedia scrape failed for %s", company)
-            span.set_attribute("found", False)
-            return WikipediaResult(document=None, official_website=official_url)
+        return WikipediaResult(
+            document=primary_doc,
+            official_website=official_url,
+            related_documents=related_docs,
+        )

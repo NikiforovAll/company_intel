@@ -40,6 +40,20 @@ def configure_telemetry() -> None:
     aspire_views = [
         View(
             instrument_type=Histogram,
+            instrument_name="scraper.phase_duration",
+            aggregation=ExplicitBucketHistogramAggregation(
+                boundaries=[1, 5, 10, 30, 60, 120, 300, 600]
+            ),
+        ),
+        View(
+            instrument_type=Histogram,
+            instrument_name="scraper.page_content_size",
+            aggregation=ExplicitBucketHistogramAggregation(
+                boundaries=[100, 500, 1000, 5000, 10000, 25000, 50000]
+            ),
+        ),
+        View(
+            instrument_type=Histogram,
             aggregation=ExplicitBucketHistogramAggregation(),
         ),
         View(
