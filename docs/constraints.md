@@ -68,7 +68,7 @@ Explicit bounds for each stage of the pipeline. These are not aspirational — t
 | -------------------- | ----------------------------------- | ------------------------------------------ |
 | Top-k                | 8–10 chunks per query               | 32K context allows more chunks than 8K did |
 | Filter               | Optional `company` filter, inferred by LLM from context | Narrows scope when single company; omitted for cross-company queries |
-| Similarity threshold | 0.3 minimum cosine similarity       | Discard irrelevant results                 |
+| Similarity threshold | 0.45 minimum cosine similarity       | Discard irrelevant results                 |
 | Context budget       | ≤ 4,000 tokens total retrieved text | Comfortable within 32K context window      |
 
 ## 7. Generation Constraints
@@ -82,6 +82,6 @@ Explicit bounds for each stage of the pipeline. These are not aspirational — t
 | Conversation history | ≤ 4,000 tokens (sliding window)                        | ~6-8 turns                                      |
 | Generation headroom  | ≥ 3,000 tokens                                         | For the model's response                        |
 | Token budget check   | system + context + history + headroom ≤ context_window | Enforced before every call                      |
-| Temperature          | 0.1–0.3                                                | Factual answers, low creativity                 |
+| Temperature          | 0.1–0.45                                                | Factual answers, low creativity                 |
 | Grounding            | Answer ONLY from retrieved context                     | Hallucination prevention                        |
 | Citation             | Every claim must reference source URL                  | Traceability                                    |

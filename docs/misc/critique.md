@@ -86,14 +86,14 @@ Problems:
 
 We have:
 - Detailed constraints (chunk size, top-k, similarity threshold)
-- Specific numeric values (0.3 cosine threshold, 512 max tokens, 50-token overlap)
+- Specific numeric values (0.45 cosine threshold, 512 max tokens, 50-token overlap)
 
 But **none of these numbers are validated.** They're copy-pasted from tutorials and blog posts. We don't have:
 - A test set of questions per company
 - Ground truth answers to measure against
 - Retrieval quality metrics (precision@k, recall@k, MRR)
 - End-to-end answer quality assessment
-- A way to know if 0.3 threshold is right vs 0.25 or 0.4
+- A way to know if 0.45 threshold is right vs 0.25 or 0.4
 
 We're building an entire pipeline on vibes-based parameter selection.
 

@@ -69,7 +69,7 @@
 - Local LLM via **Ollama** (Qwen3 8B, Q4_K_M) for fully offline chat — 32K context window
 - System prompt scoped to knowledge base only
 - Conversation memory with sliding window (~6-8 turns, ≤4,000 tokens)
-- "I don't know" guardrails when retrieval confidence is low (cosine < 0.3)
+- "I don't know" guardrails when retrieval confidence is low (cosine < 0.45)
 
 ### 6. Architecture
 

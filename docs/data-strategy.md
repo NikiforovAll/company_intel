@@ -144,7 +144,7 @@ User query → dense embed + BM25 tokenize
   → optional company filter (inferred by LLM from context)
   → Qdrant prefetch: top-20 dense + top-20 sparse
   → RRF fusion (k=60) → top-10
-  → similarity threshold filter (cosine ≥ 0.3)
+  → similarity threshold filter (cosine ≥ 0.45)
   → ≤ 4,000 tokens retrieved context → LLM
 ```
 
@@ -152,7 +152,7 @@ User query → dense embed + BM25 tokenize
 | -------------------- | ---------------------------------- |
 | Top-k                | 8–10 chunks per query              |
 | Company filter       | Optional, inferred by LLM          |
-| Similarity threshold | 0.3 minimum cosine similarity      |
+| Similarity threshold | 0.45 minimum cosine similarity      |
 | Context budget       | ≤ 4,000 tokens total retrieved text|
 
 When no chunks pass the threshold → "I don't have enough information about that."

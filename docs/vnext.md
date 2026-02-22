@@ -28,7 +28,7 @@ Improvements we recognize but deliberately defer. Each entry explains what we'd 
 
 ## 4. Evaluation Pipeline
 
-**Current**: No automated quality measurement. Parameter choices (0.3 cosine threshold, top-10, 512 token chunks) are based on literature, not validated on our data.
+**Current**: No automated quality measurement. Parameter choices (0.45 cosine threshold, top-10, 512 token chunks) are based on literature, not validated on our data.
 
 **Improvement**: Build an evaluation harness — golden Q&A dataset per company, measure recall@k, MRR, answer grounding accuracy, citation correctness. Run as CI step on parameter changes.
 

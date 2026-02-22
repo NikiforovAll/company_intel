@@ -12,7 +12,7 @@ Previously: llama3 8B (8K context). Changed because 8K context was a critical bo
 | **qwen3 8B** | 8B | 32K | ~5.6 GB | **64.3** | — | Primary choice |
 | llama3.1 8B | 8B | 128K | ~6 GB | 48.3 | **75.9** | Fallback |
 | qwen2.5 7B | 7B | 128K | ~5.5 GB | 56.3 | 71.2 | Strong but hallucination-prone |
-| mistral 7B v0.3 | 7.3B | 32K | ~5.5 GB | 24.5 | ~65 | Outclassed |
+| mistral 7B v0.45 | 7.3B | 32K | ~5.5 GB | 24.5 | ~65 | Outclassed |
 | gemma2 9B | 9B | 8K | ~6.5 GB | 52.1 | 70.1 | Good grounding, limited context |
 | phi-3.5 mini | 3.8B | 128K | ~3.5 GB | ~48 | ~67 | Too small for complex QA |
 
@@ -35,7 +35,7 @@ Previously: llama3 8B (8K context). Changed because 8K context was a critical bo
 ### llama3.1 8B
 Best IFEval score (75.9) — most reliable at following grounding instructions. If Qwen3 hallucinates, swap the model string. Not a feature to build — just a human decision.
 
-### mistral 7B v0.3
+### mistral 7B v0.45
 MMLU-Pro 24.5 — far behind every competitor. No longer competitive at this size class.
 
 ### gemma2 9B

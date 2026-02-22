@@ -186,10 +186,10 @@ client.upsert(
         PointStruct(
             id=1,
             vector={
-                "dense": [0.12, -0.34, ..., 0.56],  # 384-dim from your model
+                "dense": [0.12, -0.454, ..., 0.56],  # 384-dim from your model
                 "sparse": SparseVector(
                     indices=[331, 14136, 50021],  # vocab token IDs
-                    values=[0.5, 0.7, 0.3],       # term weights
+                    values=[0.5, 0.7, 0.45],       # term weights
                 ),
             },
             payload={"text": "..."},
@@ -268,7 +268,7 @@ sparse_rank = Knn(
 # Fuse with weighted RRF
 hybrid_rank = Rrf(
     ranks=[dense_rank, sparse_rank],
-    weights=[0.7, 0.3],  # lean toward semantic, but keyword gets a vote
+    weights=[0.7, 0.45],  # lean toward semantic, but keyword gets a vote
     k=60,
 )
 

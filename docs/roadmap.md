@@ -81,7 +81,7 @@ The LLM routes between them based on user message. Both capabilities live in a s
 | ------------------------------------- | -------------------- | ------------------------------------------------------- |
 | `search` agent tool — hybrid retrieval | FR-5, Constraints §6 | Top-k chunks via RRF (BM25 + dense), company filter     |
 | System prompt — grounding + citations | FR-5                 | Answers reference source URLs, no hallucination         |
-| Confidence threshold                  | FR-5                 | "I don't have enough information" when cosine < 0.3     |
+| Confidence threshold                  | FR-5                 | "I don't have enough information" when cosine < 0.45     |
 | Company filter inference              | Constraints §6       | LLM infers company from conversation context            |
 | Multi-turn conversation               | FR-5                 | Sliding window (≤ 4K tokens history), context preserved |
 | Token budget enforcement              | Constraints §7       | system + context + history + headroom ≤ 32K             |

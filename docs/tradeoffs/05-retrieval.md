@@ -88,9 +88,9 @@ With 32K context window (Qwen3), we have more budget than before:
 
 ## Similarity Threshold
 
-**Minimum cosine similarity: 0.3**
+**Minimum cosine similarity: 0.45**
 
-- Below 0.3 → likely irrelevant noise
+- Below 0.45 → likely irrelevant noise
 - Above 0.7 → high confidence
 - No chunks pass threshold → "I don't have enough information about that."
 
