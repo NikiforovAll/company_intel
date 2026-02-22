@@ -4,36 +4,36 @@
 
 | Doc                                  | What it covers                                                  |
 | ------------------------------------ | --------------------------------------------------------------- |
-| [SPEC.md](SPEC.md)                   | Original task spec from OBRIO                                   |
+| [SPEC.md](SPEC.md)                   | Original task spec                                              |
 | [requirements.md](requirements.md)   | Functional (FR-1→6) and non-functional (NFR-1→6) requirements   |
 | [constraints.md](constraints.md)     | Hard bounds for every pipeline stage (scraping → generation)    |
 | [data-strategy.md](data-strategy.md) | Data model, storage layout, chunking, embedding, retrieval flow |
 | [drivers.md](drivers.md)             | Technology choices with rationale                               |
-| [roadmap.md](roadmap.md)             | Phased implementation plan (Phase 0→5)                         |
-| [vnext.md](vnext.md)                 | Known improvements, deliberately deferred                      |
+| [roadmap.md](roadmap.md)             | Phased implementation plan (Phase 0→5)                          |
+| [vnext.md](vnext.md)                 | Known improvements, deliberately deferred                       |
 
 ## Tradeoff Analysis
 
 Each doc compares alternatives and documents the decision.
 
-| Doc                                                                | Decision                                                   |
-| ------------------------------------------------------------------ | ---------------------------------------------------------- |
-| [tradeoffs/01-scraping.md](tradeoffs/01-scraping.md)               | Crawl4AI over Firecrawl, BeautifulSoup, Scrapy             |
-| [tradeoffs/02-text-processing.md](tradeoffs/02-text-processing.md) | Semantic chunking on Markdown (256-512 tokens)             |
-| [tradeoffs/03-embeddings.md](tradeoffs/03-embeddings.md)           | snowflake-arctic-embed-s (384-dim) over MiniLM             |
-| [tradeoffs/04-vector-store.md](tradeoffs/04-vector-store.md)       | Qdrant over ChromaDB (pre-search filtering, hybrid search) |
-| [tradeoffs/05-embedding-runtime.md](tradeoffs/05-embedding-runtime.md) | Ollama dense + fastembed BM25, tiktoken for counting   |
-| [tradeoffs/05-retrieval.md](tradeoffs/05-retrieval.md)             | Hybrid RRF (BM25 + dense) over vector-only                 |
-| [tradeoffs/06-llm-inference.md](tradeoffs/06-llm-inference.md)     | Qwen3 8B (32K context) over Llama3 (8K)                    |
-| [tradeoffs/07-ui.md](tradeoffs/07-ui.md)                         | CopilotKit + Next.js over AG-UI Dojo (minimal standalone UI)   |
+| Doc                                                                    | Decision                                                     |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------ |
+| [tradeoffs/01-scraping.md](tradeoffs/01-scraping.md)                   | Crawl4AI over Firecrawl, BeautifulSoup, Scrapy               |
+| [tradeoffs/02-text-processing.md](tradeoffs/02-text-processing.md)     | Semantic chunking on Markdown (256-512 tokens)               |
+| [tradeoffs/03-embeddings.md](tradeoffs/03-embeddings.md)               | snowflake-arctic-embed-s (384-dim) over MiniLM               |
+| [tradeoffs/04-vector-store.md](tradeoffs/04-vector-store.md)           | Qdrant over ChromaDB (pre-search filtering, hybrid search)   |
+| [tradeoffs/05-embedding-runtime.md](tradeoffs/05-embedding-runtime.md) | Ollama dense + fastembed BM25, tiktoken for counting         |
+| [tradeoffs/05-retrieval.md](tradeoffs/05-retrieval.md)                 | Hybrid RRF (BM25 + dense) over vector-only                   |
+| [tradeoffs/06-llm-inference.md](tradeoffs/06-llm-inference.md)         | Qwen3 8B (32K context) over Llama3 (8K)                      |
+| [tradeoffs/07-ui.md](tradeoffs/07-ui.md)                               | CopilotKit + Next.js over AG-UI Dojo (minimal standalone UI) |
 
 ## Implementation
 
-| Doc                                                              | What it covers                                              |
-| ---------------------------------------------------------------- | ----------------------------------------------------------- |
-| [implementation/scraper.md](implementation/scraper.md)           | Scraper pipeline: Crawl4AI, URL resolution, text cleaning   |
-| [implementation/chunking-embedding.md](implementation/chunking-embedding.md) | Chunking, embedding & Qdrant ingestion pipeline |
-| [implementation/retrieval.md](implementation/retrieval.md)       | Hybrid retrieval: RRF fusion, context budget, chat agent wiring |
+| Doc                                                                          | What it covers                                                  |
+| ---------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| [implementation/scraper.md](implementation/scraper.md)                       | Scraper pipeline: Crawl4AI, URL resolution, text cleaning       |
+| [implementation/chunking-embedding.md](implementation/chunking-embedding.md) | Chunking, embedding & Qdrant ingestion pipeline                 |
+| [implementation/retrieval.md](implementation/retrieval.md)                   | Hybrid retrieval: RRF fusion, context budget, chat agent wiring |
 
 ## Misc
 

@@ -71,12 +71,11 @@ User: "ingest Figma"              User: "Who are competitors?"
 
 ---
 
-# Backoffice — Data Ingestion
+# Chat — Chat Window
 
-![center](./img/backoffice_01.png)
+![center](./img/chat-01.png)
 
 ---
-
 # Chat — Q&A with Citations
 
 ![center](./img/chat-02.png)
@@ -86,6 +85,12 @@ User: "ingest Figma"              User: "Who are competitors?"
 # Chat — Detailed Research
 
 ![center](./img/chat-03.png)
+
+---
+
+# Backoffice — Data Ingestion
+
+![center](./img/backoffice_01.png)
 
 ---
 
@@ -238,6 +243,94 @@ User query
 # Scraper Metrics
 
 ![center](./img/backoffice_03.png)
+
+---
+
+![bg fit](./img/bg-section.png)
+
+# Phase 4: **RAG Evaluation**
+
+## Measure retrieval quality before it reaches the LLM
+
+---
+
+![bg fit](./img/bg-slide-alt2.png)
+
+# Evaluation Approach
+
+```
+Golden dataset (curated Q&A pairs with expected facts)
+  → Ingest raw data into vector store
+  → Run each query through retrieval pipeline
+  → Check: did retrieved chunks contain expected facts?
+  → Compute Hit Rate & Context Recall
+  → Assert thresholds in CI
+```
+
+<br/>
+
+<div class="key">
+
+**Key:** Evaluation runs as an integration test — Aspire starts all services, eval runs end-to-end
+
+</div>
+
+---
+
+![bg fit](./img/bg-slide-alt2.png)
+
+# Why Aspire for Eval?
+
+- **Clean environment** — fresh Qdrant container per test run, no stale data
+- **Isolation** — all services (Ollama, Qdrant, agent) spun up and torn down automatically
+- **No port conflicts** — Aspire assigns random ports, test discovers them via service name
+- **One command** — `dotnet test` boots the entire stack, runs eval, asserts thresholds
+- **Same pipeline** — eval exercises the real ingestion + retrieval
+
+<div class="tip">
+
+**Benefit:** Confidence that eval results reflect production behavior — not a simulated environment
+
+</div>
+
+---
+
+![bg fit](./img/bg-slide-alt2.png)
+
+# Metrics
+
+| Metric | What it measures |
+|--------|-----------------|
+| **Hit Rate** | % of queries where *at least one* expected fact is retrieved |
+| **Context Recall** | Average % of expected facts found per query |
+
+<br/>
+
+- **Substring matching** — each expected fact checked against retrieved chunks
+- No LLM involvement — deterministic, fast 
+- We could use LLM-as-judge for semantic matching, but substring is sufficient here
+- Golden dataset: 18 queries, 2–4 reference facts each
+
+---
+
+![bg fit](./img/bg-slide-alt1.png)
+
+# Best Practices for RAG Evaluation
+
+- **Golden datasets** — curated Q&A pairs with ground-truth contexts
+- **Separate retrieval from generation** — measure each independently
+- **LLM-as-judge** — use strong LLM to score answer faithfulness & relevance
+- **Multiple metrics** — precision, recall, MRR, NDCG at different K values
+- **Regression testing** — run eval in CI, fail on quality drops
+- **RAGAS framework** — standardized metrics for RAG pipelines
+
+<br/>
+
+<div class="tip">
+
+**Our trade-off:** LLM-as-judge requires a fast, capable model — with local Qwen3 8B, substring matching gives reliable signal in seconds vs. minutes
+
+</div>
 
 ---
 
