@@ -14,6 +14,7 @@ from starlette.responses import Response
 
 from agent.app import create_agent
 from agent.backoffice import create_backoffice_agent
+from agent.eval import router as eval_router
 from agent.telemetry import configure_telemetry
 
 configure_telemetry()
@@ -40,6 +41,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(eval_router)
 
 agent = create_agent()
 backoffice_agent = create_backoffice_agent()

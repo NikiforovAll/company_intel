@@ -1,0 +1,177 @@
+{
+  "company": "paypal",
+  "description": "Golden dataset for PayPal RAG retrieval quality evaluation. Each reference_context is a distinct fact substring that must appear in retrieved chunks.",
+  "queries": [
+    {
+      "id": "q01",
+      "query": "When was PayPal founded and by whom?",
+      "reference": "PayPal was originally established by Max Levchin, Peter Thiel, and Luke Nosek in December 1998 as Fieldlink, later renamed Confinity.",
+      "reference_contexts": [
+        "established by Max Levchin, Peter Thiel, and Luke Nosek in December 1998 as Fieldlink",
+        "renamed Confinity"
+      ]
+    },
+    {
+      "id": "q02",
+      "query": "How much did eBay pay to acquire PayPal?",
+      "reference": "eBay acquired PayPal on October 3, 2002, for $1.5 billion in eBay stock.",
+      "reference_contexts": [
+        "eBay acquired the company on October 3, 2002",
+        "$1.5 billion in eBay stock"
+      ]
+    },
+    {
+      "id": "q03",
+      "query": "When did PayPal go public and at what IPO price?",
+      "reference": "PayPal's IPO listed on NASDAQ under the ticker PYPL at $13 per share and generated over $61 million.",
+      "reference_contexts": [
+        "listed on NASDAQ under the ticker PYPL",
+        "$13 per share",
+        "generated over $61 million"
+      ]
+    },
+    {
+      "id": "q04",
+      "query": "When did eBay spin off PayPal?",
+      "reference": "The spin-off was announced on September 30, 2014 and completed on July 18, 2015.",
+      "reference_contexts": [
+        "announced on September 30, 2014",
+        "eBay would spin off PayPal",
+        "completed on July 18, 2015"
+      ]
+    },
+    {
+      "id": "q05",
+      "query": "What was PayPal's total payment volume in 2012?",
+      "reference": "By the end of 2012, PayPal's total payment volume processed was US$145 billion.",
+      "reference_contexts": [
+        "total payment volume processed was US$145 billion",
+        "accounted for 40% of eBay's revenue"
+      ]
+    },
+    {
+      "id": "q06",
+      "query": "Who is PayPal's CEO?",
+      "reference": "In February 2026, PayPal announced the appointment of Enrique Lores as CEO, replacing Alex Chriss.",
+      "reference_contexts": [
+        "Enrique Lores as CEO",
+        "replacing Alex Chriss"
+      ]
+    },
+    {
+      "id": "q07",
+      "query": "How much did PayPal pay for iZettle?",
+      "reference": "PayPal agreed to purchase Swedish payment processor iZettle for $2.2 billion in May 2018.",
+      "reference_contexts": [
+        "Swedish payment processor iZettle",
+        "$2.2 billion"
+      ]
+    },
+    {
+      "id": "q08",
+      "query": "What is PayPal's revenue?",
+      "reference": "For fiscal year 2019, PayPal reported annual revenue of $17.772 billion, an increase of 15% over the previous fiscal cycle, with earnings of US$2.459 billion.",
+      "reference_contexts": [
+        "earnings of US$2.459 billion",
+        "annual revenue of $17.772 billion",
+        "increase of 15% over the previous fiscal cycle"
+      ]
+    },
+    {
+      "id": "q09",
+      "query": "What is PayPal Honey?",
+      "reference": "Honey (now PayPal Honey) is a browser extension that automatically applies online coupons on e-commerce websites. Founded in 2012 by Ryan Hudson and George Ruan, it was acquired by PayPal in 2020 for approximately $4 billion.",
+      "reference_contexts": [
+        "browser extension that automatically applies online coupons",
+        "Founded in 2012 by Ryan Hudson and George Ruan",
+        "acquired by PayPal in 2020 for approximately $4 billion"
+      ]
+    },
+    {
+      "id": "q10",
+      "query": "How much did PayPal pay to acquire Honey?",
+      "reference": "PayPal acquired Honey in 2020 for approximately $4 billion, making it PayPal's largest acquisition.",
+      "reference_contexts": [
+        "acquired by PayPal for about $4 billion",
+        "PayPal's rewards program"
+      ]
+    },
+    {
+      "id": "q11",
+      "query": "What is PayPal.Me?",
+      "reference": "PayPal.Me is a peer-to-peer payment platform launched on September 1, 2015 that allows users to send a custom link to request funds via text, email, or other messaging platforms.",
+      "reference_contexts": [
+        "peer-to-peer payment platform",
+        "PayPal.Me",
+        "send a custom link to request funds"
+      ]
+    },
+    {
+      "id": "q12",
+      "query": "How much did PayPal pay for Xoom?",
+      "reference": "PayPal spent $25 a share in cash to acquire Xoom, or about $1.09 billion.",
+      "reference_contexts": [
+        "$25 a share",
+        "acquire the publicly traded Xoom",
+        "$1.09 billion"
+      ]
+    },
+    {
+      "id": "q13",
+      "query": "Who are the members of the PayPal Mafia?",
+      "reference": "Key members of the PayPal Mafia include Peter Thiel (founder/CEO), Elon Musk (X.com founder), Max Levchin (CTO, CEO of Affirm), Reid Hoffman (founded LinkedIn).",
+      "reference_contexts": [
+        "Peter Thiel, PayPal founder and former CEO",
+        "Elon Musk, co-founder of Zip2 and founder of X.com",
+        "Max Levchin, founder and chief technology officer at PayPal",
+        "Reid Hoffman, former executive vice president who founded LinkedIn"
+      ]
+    },
+    {
+      "id": "q14",
+      "query": "What companies did PayPal Mafia members found?",
+      "reference": "PayPal Mafia members founded or developed LinkedIn, Palantir Technologies, SpaceX, Affirm, Slide, Kiva, YouTube, Yelp, and Yammer.",
+      "reference_contexts": [
+        "such as LinkedIn, Palantir Technologies, SpaceX",
+        "Affirm, Slide, Kiva, YouTube, Yelp, and Yammer"
+      ]
+    },
+    {
+      "id": "q15",
+      "query": "How much did PayPal pay for Braintree?",
+      "reference": "PayPal acquired Braintree, a Chicago-based payment gateway, on September 26, 2013 for $800 million.",
+      "reference_contexts": [
+        "Braintree, a Chicago-based payment gateway",
+        "Sep 26, 2013 | Braintree | $800M"
+      ]
+    },
+    {
+      "id": "q16",
+      "query": "When did PayPal acquire Venmo?",
+      "reference": "PayPal acquired Venmo on September 26, 2013 for $26.2 million.",
+      "reference_contexts": [
+        "Sep 26, 2013",
+        "Venmo",
+        "$26.2M"
+      ]
+    },
+    {
+      "id": "q17",
+      "query": "Is PayPal available in Ukraine?",
+      "reference": "Yes, PayPal is available in Ukraine. Ukrainian customers can send and receive payments between family and friends, and PayPal is temporarily waiving fees for all Ukrainian accounts.",
+      "reference_contexts": [
+        "Ukrainian customers can send and receive payments",
+        "waiving our fees for all Ukrainian accounts"
+      ]
+    },
+    {
+      "id": "q18",
+      "query": "What security features does PayPal offer?",
+      "reference": "PayPal uses encryption technology to help make sure money transfers are secure.",
+      "reference_contexts": [
+        "encryption technology",
+        "money transfers are secure"
+      ]
+    }
+  ]
+}

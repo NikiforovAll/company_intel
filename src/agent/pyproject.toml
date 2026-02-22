@@ -13,6 +13,8 @@ dependencies = [
     "qdrant-client>=1.12",
     "fastembed>=0.4",
     "tiktoken>=0.8",
+    "ragas",
+    "rapidfuzz>=3.14.3",
 ]
 
 [dependency-groups]
@@ -39,8 +41,9 @@ warn_return_any = true
 warn_unused_configs = true
 
 [[tool.mypy.overrides]]
-module = ["crawl4ai.*", "langdetect.*", "fastembed.*", "qdrant_client.*", "tiktoken.*"]
+module = ["crawl4ai.*", "langdetect.*", "fastembed.*", "qdrant_client.*", "tiktoken.*", "ragas.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = ["eval: RAG retrieval quality evaluation (requires Aspire)"]

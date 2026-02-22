@@ -14,6 +14,8 @@ public class AgentHealthTests
         using var cts = new CancellationTokenSource(DefaultTimeout);
 
         var appHost = await DistributedApplicationTestingBuilder.CreateAsync<Projects.AppHost>(
+            ["UseVolumes=false"],
+            (appOptions, _) => appOptions.DisableDashboard = true,
             cts.Token
         );
 

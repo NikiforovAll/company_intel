@@ -13,6 +13,13 @@ var qdrant = builder
     .AddQdrant("qdrant", apiKey: builder.AddParameter("qdrant-apikey", "localdev"))
     .WithLifetime(ContainerLifetime.Persistent);
 
+if (
+    !string.Equals(builder.Configuration["UseVolumes"], "false", StringComparison.OrdinalIgnoreCase)
+)
+{
+    qdrant.WithDataVolume();
+}
+
 var agent = builder
     .AddUvicornApp("company-intel-agent", "../agent", "main:app")
     .WithUv()
