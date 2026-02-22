@@ -38,12 +38,15 @@ importers:
       '@vercel/otel':
         specifier: ^2.1.1
         version: 2.1.1(@opentelemetry/api-logs@0.212.0)(@opentelemetry/api@1.9.0)(@opentelemetry/instrumentation@0.212.0(@opentelemetry/api@1.9.0))(@opentelemetry/resources@2.5.1(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-logs@0.212.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-metrics@2.5.1(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.5.1(@opentelemetry/api@1.9.0))
+      cose-base:
+        specifier: ^2.2.0
+        version: 2.2.0
+      devlop:
+        specifier: ^1.1.0
+        version: 1.1.0
       hono:
         specifier: ^4.12.1
         version: 4.12.1
-      mermaid:
-        specifier: ^11.12.3
-        version: 11.12.3
       next:
         specifier: ^15.3.0
         version: 15.5.12(@opentelemetry/api@1.9.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -56,6 +59,9 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
+      ts-deepmerge:
+        specifier: ^7.0.3
+        version: 7.0.3
     devDependencies:
       '@tailwindcss/postcss':
         specifier: ^4
