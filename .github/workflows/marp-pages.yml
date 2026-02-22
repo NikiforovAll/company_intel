@@ -20,11 +20,14 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Copy assets
-        run: mkdir build && cp -R slides/img build/img && cp -R slides/themes build/themes
+        run: |
+          mkdir -p build/rag-pydantic-ai-example
+          cp -R slides/img build/rag-pydantic-ai-example/img
+          cp -R slides/themes build/rag-pydantic-ai-example/themes
       - name: Marp Build
         uses: docker://marpteam/marp-cli:latest
         with:
-          args: --theme-set slides/themes -o build/index.html --html -- slides/presentation.md
+          args: --theme-set slides/themes -o build/rag-pydantic-ai-example/index.html --html -- slides/presentation.md
         env:
           MARP_USER: root:root
       - uses: actions/configure-pages@v5
